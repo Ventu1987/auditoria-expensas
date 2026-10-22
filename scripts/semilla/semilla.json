@@ -1,0 +1,1449 @@
+{
+ "correcciones": [
+  {
+   "ID_Correccion": "K-S2-2026-09-G001",
+   "Barrio": "S2",
+   "Mes": "2026-09",
+   "ID_Gasto": "S2-2026-09-G001",
+   "Concepto": "Impuesto inmobiliario ARBA (plan de pagos)",
+   "Importe_Liquidado": 298.72,
+   "Importe_Correcto": 0,
+   "Criterio": "H13",
+   "Detalle": "Cuotas 59 y 60 ya liquidadas en 08/2026.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-09-G002",
+   "Barrio": "S2",
+   "Mes": "2026-09",
+   "ID_Gasto": "S2-2026-09-G002",
+   "Concepto": "Impuesto inmobiliario ARBA (plan de pagos)",
+   "Importe_Liquidado": 298.72,
+   "Importe_Correcto": 0,
+   "Criterio": "H13",
+   "Detalle": "Cuotas 59 y 60 ya liquidadas en 08/2026.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-09-G005",
+   "Barrio": "S2",
+   "Mes": "2026-09",
+   "ID_Gasto": "S2-2026-09-G005",
+   "Concepto": "Mantenimiento Fideicomiso - espacios propios 80%",
+   "Importe_Liquidado": 1171468.17,
+   "Importe_Correcto": 998713.26,
+   "Criterio": "H04, H25, H06, H05",
+   "Detalle": "Base del mantenimiento sin los gastos que no corresponden (ver cuadro del Fideicomiso).",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-09-G006",
+   "Barrio": "S2",
+   "Mes": "2026-09",
+   "ID_Gasto": "S2-2026-09-G006",
+   "Concepto": "Mantenimiento Fideicomiso - espacios comunes 20%",
+   "Importe_Liquidado": 272176.51,
+   "Importe_Correcto": 232038.99,
+   "Criterio": "H04, H25, H06, H05",
+   "Detalle": "Base del mantenimiento sin los gastos que no corresponden (ver cuadro del Fideicomiso).",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-09-G009",
+   "Barrio": "S2",
+   "Mes": "2026-09",
+   "ID_Gasto": "S2-2026-09-G009",
+   "Concepto": "Caja chica Fideicomiso",
+   "Importe_Liquidado": 90511.91,
+   "Importe_Correcto": 75704.53,
+   "Criterio": "H31",
+   "Detalle": "Solo comprobantes fiscales × 12,765%.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-09-G015",
+   "Barrio": "S2",
+   "Mes": "2026-09",
+   "ID_Gasto": "S2-2026-09-G015",
+   "Concepto": "Servicio de seguridad / vigilancia",
+   "Importe_Liquidado": 5918162.43,
+   "Importe_Correcto": 5462919.17,
+   "Criterio": "H08",
+   "Detalle": "Seguridad compartida repartida por lotes: 18 de 39.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-10-G003",
+   "Barrio": "S2",
+   "Mes": "2026-10",
+   "ID_Gasto": "S2-2026-10-G003",
+   "Concepto": "Electricidad sectores comunes - Fideicomiso",
+   "Importe_Liquidado": 498204,
+   "Importe_Correcto": 448880.82,
+   "Criterio": "H28",
+   "Detalle": "Sin la cuenta industrial 7884753119.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-10-G006",
+   "Barrio": "S2",
+   "Mes": "2026-10",
+   "ID_Gasto": "S2-2026-10-G006",
+   "Concepto": "Mantenimiento Fideicomiso - espacios propios 80%",
+   "Importe_Liquidado": 945532.36,
+   "Importe_Correcto": 863634.61,
+   "Criterio": "H32, H29, H27",
+   "Detalle": "Base del mantenimiento sin los gastos que no corresponden (ver cuadro del Fideicomiso).",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-10-G007",
+   "Barrio": "S2",
+   "Mes": "2026-10",
+   "ID_Gasto": "S2-2026-10-G007",
+   "Concepto": "Mantenimiento Fideicomiso - espacios comunes 20%",
+   "Importe_Liquidado": 236383.09,
+   "Importe_Correcto": 200655.09,
+   "Criterio": "H32, H29, H27",
+   "Detalle": "Base del mantenimiento sin los gastos que no corresponden (ver cuadro del Fideicomiso).",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-10-G009",
+   "Barrio": "S2",
+   "Mes": "2026-10",
+   "ID_Gasto": "S2-2026-10-G009",
+   "Concepto": "Telered",
+   "Importe_Liquidado": 567600,
+   "Importe_Correcto": 100000,
+   "Criterio": "H26",
+   "Detalle": "Abono informado por la administración el 10/09/2026.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-10-G010",
+   "Barrio": "S2",
+   "Mes": "2026-10",
+   "ID_Gasto": "S2-2026-10-G010",
+   "Concepto": "Caja chica Fideicomiso",
+   "Importe_Liquidado": 95928.98,
+   "Importe_Correcto": 25530.01,
+   "Criterio": "H31",
+   "Detalle": "Solo comprobantes fiscales × 12,765%.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-10-G015",
+   "Barrio": "S2",
+   "Mes": "2026-10",
+   "ID_Gasto": "S2-2026-10-G015",
+   "Concepto": "Servicio de seguridad / vigilancia",
+   "Importe_Liquidado": 5880744.15,
+   "Importe_Correcto": 5738468.08,
+   "Criterio": "H23",
+   "Detalle": "Importe de la factura B 0002-00003731.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-10-G017",
+   "Barrio": "S2",
+   "Mes": "2026-10",
+   "ID_Gasto": "S2-2026-10-G017",
+   "Concepto": "Obra de cámaras (obra civil)",
+   "Importe_Liquidado": 1344000,
+   "Importe_Correcto": 0,
+   "Criterio": "H30",
+   "Detalle": "Obra: se paga con el fondo extraordinario.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-06-G012",
+   "Barrio": "S2",
+   "Mes": "2026-06",
+   "ID_Gasto": "S2-2026-06-G012",
+   "Concepto": "Servicio de seguridad / vigilancia",
+   "Importe_Liquidado": 5374516.27,
+   "Importe_Correcto": 4961091.94,
+   "Criterio": "H08",
+   "Detalle": "Por lotes (18 de 39). Factura total no cargada: se toma el doble de lo liquidado (REVISAR).",
+   "Es_Estimado": "SI",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-07-G011",
+   "Barrio": "S2",
+   "Mes": "2026-07",
+   "ID_Gasto": "S2-2026-07-G011",
+   "Concepto": "Servicio de seguridad / vigilancia",
+   "Importe_Liquidado": 5398266.09,
+   "Importe_Correcto": 4983014.85,
+   "Criterio": "H08",
+   "Detalle": "Por lotes (18 de 39). Factura total no cargada: se toma el doble de lo liquidado (REVISAR).",
+   "Es_Estimado": "SI",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-08-G014",
+   "Barrio": "S2",
+   "Mes": "2026-08",
+   "ID_Gasto": "S2-2026-08-G014",
+   "Concepto": "Servicio de seguridad / vigilancia",
+   "Importe_Liquidado": 5789068.61,
+   "Importe_Correcto": 5343755.64,
+   "Criterio": "H08",
+   "Detalle": "Por lotes (18 de 39) de la factura compartida de $ 11.578.137,22.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-08-G015",
+   "Barrio": "S2",
+   "Mes": "2026-08",
+   "ID_Gasto": "S2-2026-08-G015",
+   "Concepto": "Equipamiento CCTV (PC, monitores, UPS)",
+   "Importe_Liquidado": 1278320,
+   "Importe_Correcto": 0,
+   "Criterio": "H24",
+   "Detalle": "Compra de equipos con presupuesto, sin factura: gasto extraordinario.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Correccion": "K-S2-2026-08-G003",
+   "Barrio": "S2",
+   "Mes": "2026-08",
+   "ID_Gasto": "S2-2026-08-G003",
+   "Concepto": "Electricidad - EDENOR",
+   "Importe_Liquidado": 575004.2,
+   "Importe_Correcto": 572516.52,
+   "Criterio": "H10",
+   "Detalle": "Importe de la factura sin el recargo del 2.º vencimiento.",
+   "Es_Estimado": "NO",
+   "Estado": "APLICADA",
+   "Origen": "semilla"
+  }
+ ],
+ "respaldo": {
+  "S2-2026-08-G001": {
+   "tipo": 4,
+   "doc": "Número de cuota",
+   "obs": ""
+  },
+  "S2-2026-08-G002": {
+   "tipo": 4,
+   "doc": "Número de cuota",
+   "obs": ""
+  },
+  "S2-2026-08-G003": {
+   "tipo": 2,
+   "doc": "Factura 572.516,52 a nombre de la Fiduciaria",
+   "obs": "Liquidado provisorio, al 2.º vencimiento."
+  },
+  "S2-2026-08-G004": {
+   "tipo": 1,
+   "doc": "Factura FC0090 y transferencia",
+   "obs": "La transferencia va a otra persona (H22)."
+  },
+  "S2-2026-08-G005": {
+   "tipo": 2,
+   "doc": "Órdenes de pago del Fideicomiso",
+   "obs": "Sin base ni porcentaje informados."
+  },
+  "S2-2026-08-G006": {
+   "tipo": 2,
+   "doc": "Órdenes de pago del Fideicomiso",
+   "obs": "Sin base ni porcentaje informados."
+  },
+  "S2-2026-08-G007": {
+   "tipo": 4,
+   "doc": "FC A-0005-00018490",
+   "obs": ""
+  },
+  "S2-2026-08-G008": {
+   "tipo": 1,
+   "doc": "Factura",
+   "obs": ""
+  },
+  "S2-2026-08-G009": {
+   "tipo": 2,
+   "doc": "17 comprobantes sin detalle",
+   "obs": "Hay tiques y notas no fiscales (H15)."
+  },
+  "S2-2026-08-G010": {
+   "tipo": 5,
+   "doc": "—",
+   "obs": ""
+  },
+  "S2-2026-08-G011": {
+   "tipo": 1,
+   "doc": "Extracto",
+   "obs": ""
+  },
+  "S2-2026-08-G012": {
+   "tipo": 1,
+   "doc": "Extracto",
+   "obs": "Cuenta a nombre del administrador (H18)."
+  },
+  "S2-2026-08-G013": {
+   "tipo": 4,
+   "doc": "Número de póliza",
+   "obs": ""
+  },
+  "S2-2026-08-G014": {
+   "tipo": 2,
+   "doc": "Factura compartida de 11.578.137,22",
+   "obs": "Mitad y mitad con Senderos I (H08)."
+  },
+  "S2-2026-08-G015": {
+   "tipo": 3,
+   "doc": "Presupuesto en dólares",
+   "obs": "Sin factura (H24)."
+  },
+  "S2-2026-09-G001": {
+   "tipo": 4,
+   "doc": "Número de cuota",
+   "obs": "Ya liquidadas en 08 (H13)."
+  },
+  "S2-2026-09-G002": {
+   "tipo": 4,
+   "doc": "Número de cuota",
+   "obs": "Ya liquidadas en 08 (H13)."
+  },
+  "S2-2026-09-G003": {
+   "tipo": 3,
+   "doc": "Captura de pantalla del saldo",
+   "obs": "Provisorio, mismo importe que 08 (H10)."
+  },
+  "S2-2026-09-G004": {
+   "tipo": 1,
+   "doc": "Factura FC108",
+   "obs": ""
+  },
+  "S2-2026-09-G005": {
+   "tipo": 2,
+   "doc": "Órdenes de pago y factura de luz industrial",
+   "obs": "Incluye gastos que no corresponden (H04 a H06)."
+  },
+  "S2-2026-09-G006": {
+   "tipo": 2,
+   "doc": "Órdenes de pago y factura de luz industrial",
+   "obs": "Incluye gastos que no corresponden (H04 a H06)."
+  },
+  "S2-2026-09-G007": {
+   "tipo": 4,
+   "doc": "FC A-0005-00018584",
+   "obs": ""
+  },
+  "S2-2026-09-G008": {
+   "tipo": 5,
+   "doc": "—",
+   "obs": ""
+  },
+  "S2-2026-09-G009": {
+   "tipo": 2,
+   "doc": "9 comprobantes, algunos no fiscales",
+   "obs": ""
+  },
+  "S2-2026-09-G010": {
+   "tipo": 3,
+   "doc": "Transferencia",
+   "obs": "A una persona distinta del proveedor (H22)."
+  },
+  "S2-2026-09-G011": {
+   "tipo": 2,
+   "doc": "Factura de 2.312.000 al Fideicomiso Bella Vista",
+   "obs": "No está a nombre del barrio (H19)."
+  },
+  "S2-2026-09-G012": {
+   "tipo": 5,
+   "doc": "—",
+   "obs": "Estimado: falta el extracto de agosto."
+  },
+  "S2-2026-09-G013": {
+   "tipo": 1,
+   "doc": "Extracto",
+   "obs": ""
+  },
+  "S2-2026-09-G014": {
+   "tipo": 4,
+   "doc": "Número de póliza",
+   "obs": ""
+  },
+  "S2-2026-09-G015": {
+   "tipo": 2,
+   "doc": "Factura compartida FC06570",
+   "obs": "Mitad y mitad con Senderos I (H08)."
+  },
+  "S2-2026-09-G016": {
+   "tipo": 5,
+   "doc": "—",
+   "obs": ""
+  },
+  "S2-2026-10-G001": {
+   "tipo": 2,
+   "doc": "Boleta del predio de 193.006,20",
+   "obs": "7,842% sin criterio informado."
+  },
+  "S2-2026-10-G002": {
+   "tipo": 1,
+   "doc": "Factura y comprobante de pago",
+   "obs": "Pagada al 2.º vencimiento."
+  },
+  "S2-2026-10-G003": {
+   "tipo": 2,
+   "doc": "Facturas del Fideicomiso",
+   "obs": "Incluye una cuenta industrial (H28)."
+  },
+  "S2-2026-10-G004": {
+   "tipo": 5,
+   "doc": "—",
+   "obs": ""
+  },
+  "S2-2026-10-G005": {
+   "tipo": 5,
+   "doc": "—",
+   "obs": "Estimado."
+  },
+  "S2-2026-10-G006": {
+   "tipo": 2,
+   "doc": "Planilla de sueldos y órdenes de pago",
+   "obs": "Incluye 3 personas de administración (H29)."
+  },
+  "S2-2026-10-G007": {
+   "tipo": 2,
+   "doc": "Planilla de sueldos y órdenes de pago",
+   "obs": "Incluye 3 personas de administración (H29)."
+  },
+  "S2-2026-10-G008": {
+   "tipo": 4,
+   "doc": "FC A-0005-00018677",
+   "obs": ""
+  },
+  "S2-2026-10-G009": {
+   "tipo": 5,
+   "doc": "—",
+   "obs": "El abono informado es $ 100.000 (H26)."
+  },
+  "S2-2026-10-G010": {
+   "tipo": 2,
+   "doc": "Comprobantes: solo 27% fiscales",
+   "obs": "Presupuestos y notas (H31)."
+  },
+  "S2-2026-10-G011": {
+   "tipo": 3,
+   "doc": "Referencia, sin factura",
+   "obs": ""
+  },
+  "S2-2026-10-G012": {
+   "tipo": 1,
+   "doc": "Extracto",
+   "obs": ""
+  },
+  "S2-2026-10-G013": {
+   "tipo": 1,
+   "doc": "Extracto",
+   "obs": ""
+  },
+  "S2-2026-10-G014": {
+   "tipo": 4,
+   "doc": "Número de póliza",
+   "obs": ""
+  },
+  "S2-2026-10-G015": {
+   "tipo": 2,
+   "doc": "Factura B 0002-00003731 por $ 5.738.468,08",
+   "obs": "Se liquidaron $ 142.276,07 por encima de la factura (H23)."
+  },
+  "S2-2026-10-G016": {
+   "tipo": 5,
+   "doc": "—",
+   "obs": ""
+  },
+  "S2-2026-10-G017": {
+   "tipo": 1,
+   "doc": "Factura C y transferencia",
+   "obs": "Respaldada, pero es gasto extraordinario (H30)."
+  }
+ },
+ "hallazgos": {
+  "H01": {
+   "Monto": 1627054.66,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "No se devolvió en 10/2026; La Huella repitió el mismo esquema en 10/2026."
+  },
+  "H02": {
+   "Monto": 1443645,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Criterio de reparto vigente todos los meses."
+  },
+  "H03": {
+   "Monto": 1331128,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "La nómina del Fideicomiso entra todos los meses."
+  },
+  "H04": {
+   "Monto": 99950,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "En 10/2026 sale de la base pero vuelve como luz de sectores comunes (H28)."
+  },
+  "H05": {
+   "Monto": 13671,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Se repite si no se excluye de la base."
+  },
+  "H06": {
+   "Monto": 86704,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "En 10/2026 se excluyen las cargas, sin reintegro."
+  },
+  "H07": {
+   "Monto": 121824,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "A confirmar con recibos."
+  },
+  "H08": {
+   "Monto": 1729231.8,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "06 a 09/2026. Desde 10/2026 hay factura propia: vuelve si se comparte otra vez."
+  },
+  "H09": {
+   "Monto": 518960,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Sigue: Telered $ 567.600 en 10/2026 (H26)."
+  },
+  "H10": {
+   "Monto": 575004.2,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "La luz se sigue pagando al 2.º vencimiento."
+  },
+  "H11": {
+   "Monto": 23784934.2,
+   "Base_Monto": "saldo en riesgo",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "La deuda reconocida sigue sin figurar en las cuentas."
+  },
+  "H12": {
+   "Monto": "",
+   "Base_Monto": "sin monto",
+   "Probabilidad": "Baja",
+   "Por_Que_Probabilidad": "Reparado (informado el 06/10/2026).",
+   "Estado_Reclamo": "SOLUCIONADO"
+  },
+  "H13": {
+   "Monto": 597.44,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Baja",
+   "Por_Que_Probabilidad": "Error puntual de 09/2026."
+  },
+  "H14": {
+   "Monto": 799729.84,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Ajuste puntual; puede repetirse otro \"ajuste\" sin detalle."
+  },
+  "H15": {
+   "Monto": 260195.14,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "La caja chica se liquida todos los meses."
+  },
+  "H16": {
+   "Monto": "",
+   "Base_Monto": "sin monto",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Se repite en cada liquidación."
+  },
+  "H18": {
+   "Monto": 8510307.1,
+   "Base_Monto": "saldo en riesgo",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Toda la plata del barrio pasa por esa cuenta todos los meses."
+  },
+  "H19": {
+   "Monto": 2276000,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Puede repetirse con cada pago de honorarios sin factura."
+  },
+  "H20": {
+   "Monto": 3654176.39,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "El patrimonio sigue sin restarla."
+  },
+  "H21": {
+   "Monto": 10060000,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Depende de que manden los extractos completos."
+  },
+  "H22": {
+   "Monto": 454000,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Pagos a terceros en 08 y 09/2026."
+  },
+  "H23": {
+   "Monto": 142276.07,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Se repite si se sigue liquidando por encima de la factura."
+  },
+  "H24": {
+   "Monto": 1278320,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Compra puntual; el criterio puede repetirse."
+  },
+  "H25": {
+   "Monto": 12567,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Factura repetida entre caja chica y mantenimiento."
+  },
+  "H26": {
+   "Monto": 467600,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Telered sigue por encima del abono informado."
+  },
+  "H27": {
+   "Monto": 25520,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Detectado en 10/2026."
+  },
+  "H28": {
+   "Monto": 498204,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Cargo nuevo que sigue todos los meses."
+  },
+  "H29": {
+   "Monto": 153120,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Personal pagado todos los meses."
+  },
+  "H30": {
+   "Monto": 1344000,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Obra puntual; quedan otras obras de cámaras por pagar."
+  },
+  "H31": {
+   "Monto": 70399,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "La caja chica se liquida todos los meses."
+  }
+ },
+ "hallazgos_nuevos": [
+  {
+   "ID_Hallazgo": "H32",
+   "Barrios": "S2",
+   "Titulo": "Mantenimiento: en 10/2026 se aplicó 12,76% en vez del 13,73% publicado (a favor del barrio)",
+   "Conclusion": "",
+   "Gravedad": "A REVISAR",
+   "Monto": 71878.25,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "El coeficiente puede corregirse en contra en cualquier mes.",
+   "Donde_Verlo": "Abonos de servicios",
+   "Que_Pedir": "Pedir la tabla de coeficientes vigente.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-01",
+   "Barrios": "S2",
+   "Titulo": "Saldo de la liquidación distinto del saldo de los bancos",
+   "Conclusion": "",
+   "Gravedad": "CRÍTICO",
+   "Monto": 4964585.84,
+   "Base_Monto": "saldo en riesgo",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Solo se pudo comparar 08 y 09/2026; en los dos hay diferencia.",
+   "Donde_Verlo": "Flujo de fondos",
+   "Que_Pedir": "Conciliación bancaria de cada mes.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-02",
+   "Barrios": "S2",
+   "Titulo": "El total de deudas con proveedores es menor que lo pendiente solo del mes",
+   "Conclusion": "",
+   "Gravedad": "IMPORTANTE",
+   "Monto": "",
+   "Base_Monto": "sin monto",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Pasa en 07, 08 y 10/2026.",
+   "Donde_Verlo": "Flujo de fondos",
+   "Que_Pedir": "Listado de deudas con cada proveedor.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-03",
+   "Barrios": "S2",
+   "Titulo": "Cobros que no se sabe de qué lote son",
+   "Conclusion": "",
+   "Gravedad": "A REVISAR",
+   "Monto": 902350,
+   "Base_Monto": "saldo en riesgo",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Hay cobros sin identificar todos los meses.",
+   "Donde_Verlo": "Flujo de fondos",
+   "Que_Pedir": "Identificar cada cobro y su lote.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-04",
+   "Barrios": "S2",
+   "Titulo": "Fondo ordinario en negativo: gastos pagados con el fondo extraordinario",
+   "Conclusion": "",
+   "Gravedad": "IMPORTANTE",
+   "Monto": 350258.39,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Pasó en 08/2026.",
+   "Donde_Verlo": "Flujo de fondos",
+   "Que_Pedir": "Regla escrita de uso de cada fondo.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-05",
+   "Barrios": "S2",
+   "Titulo": "Cuentas sin fondo de reserva",
+   "Conclusion": "",
+   "Gravedad": "A REVISAR",
+   "Monto": "",
+   "Base_Monto": "sin monto",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "No figura en ningún mes.",
+   "Donde_Verlo": "Flujo de fondos",
+   "Que_Pedir": "Definir un fondo de reserva en asamblea.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-06",
+   "Barrios": "S2",
+   "Titulo": "Dos cuentas bancarias: doble mantenimiento y doble impuesto",
+   "Conclusion": "",
+   "Gravedad": "A REVISAR",
+   "Monto": 90750,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Se paga todos los meses.",
+   "Donde_Verlo": "Bancarios",
+   "Que_Pedir": "Una sola cuenta, a nombre del barrio.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-07",
+   "Barrios": "S2",
+   "Titulo": "Recargo por pagar la luz fuera de término",
+   "Conclusion": "",
+   "Gravedad": "A REVISAR",
+   "Monto": 2165.08,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "08 y 10/2026 al 2.º vencimiento.",
+   "Donde_Verlo": "Servicios públicos",
+   "Que_Pedir": "Débito automático o pago a término.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-08",
+   "Barrios": "S2",
+   "Titulo": "Lote de coeficiente reducido (65%) sin reglamento informado",
+   "Conclusion": "",
+   "Gravedad": "A REVISAR",
+   "Monto": "",
+   "Base_Monto": "sin monto",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Se aplica todos los meses.",
+   "Donde_Verlo": "Resumen",
+   "Que_Pedir": "Reglamento o acta de coeficientes.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-09",
+   "Barrios": "S2",
+   "Titulo": "Cargos particulares +237% en 10/2026 sin detalle",
+   "Conclusion": "",
+   "Gravedad": "IMPORTANTE",
+   "Monto": "",
+   "Base_Monto": "sin monto",
+   "Probabilidad": "Media",
+   "Por_Que_Probabilidad": "Varían mes a mes sin explicación.",
+   "Donde_Verlo": "Resumen",
+   "Que_Pedir": "Detalle por concepto y fondo.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-10",
+   "Barrios": "S2",
+   "Titulo": "Seguridad: a La Huella se le liquida el mismo importe al centavo que a Senderos II",
+   "Conclusion": "",
+   "Gravedad": "IMPORTANTE",
+   "Monto": "",
+   "Base_Monto": "sin monto",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Pasó en 08, 09 y 10/2026.",
+   "Donde_Verlo": "Consolidado barrios",
+   "Que_Pedir": "Facturas de seguridad de cada barrio.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-11",
+   "Barrios": "S2",
+   "Titulo": "AdminProp sube todos los meses (+42% en 4 meses)",
+   "Conclusion": "",
+   "Gravedad": "A REVISAR",
+   "Monto": 32964,
+   "Base_Monto": "por mes",
+   "Probabilidad": "Alta",
+   "Por_Que_Probabilidad": "Aumenta en cada liquidación.",
+   "Donde_Verlo": "Abonos de servicios",
+   "Que_Pedir": "Definir si lo paga el barrio o el administrador.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  },
+  {
+   "ID_Hallazgo": "N-12",
+   "Barrios": "S2",
+   "Titulo": "El total de expensas no es la suma de sus partes (centavos)",
+   "Conclusion": "",
+   "Gravedad": "A REVISAR",
+   "Monto": 0.36,
+   "Base_Monto": "una vez",
+   "Probabilidad": "Baja",
+   "Por_Que_Probabilidad": "Pasó en 07 y 08/2026.",
+   "Donde_Verlo": "Resumen",
+   "Que_Pedir": "Que el total salga de sumar sus partes.",
+   "Estado_Reclamo": "NUEVO",
+   "Lo_Que_Muestran": "",
+   "Fecha_Alta": "2026-10-21",
+   "Fecha_Solucion": "",
+   "Publicable": "SI"
+  }
+ ],
+ "eventos": [
+  {
+   "ID_Evento": "S2-EV001",
+   "Barrio": "S2",
+   "Fecha": "2026-06-21",
+   "Tipo": "Liquidación",
+   "Hecho": "Vence la expensa de 06/2026. Telered: se liquidan 3 meses juntos (04 a 06) en otro rubro.",
+   "Importe": 548250,
+   "Ref": "H09",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV002",
+   "Barrio": "S2",
+   "Fecha": "2026-06-30",
+   "Tipo": "Liquidación",
+   "Hecho": "Salen $ 4.000.000 de la cuenta sin un gasto liquidado (cañería de cámaras y dos facturas).",
+   "Importe": 4000000,
+   "Ref": "H11",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV003",
+   "Barrio": "S2",
+   "Fecha": "2026-07-16",
+   "Tipo": "Liquidación",
+   "Hecho": "Vence la expensa de 07/2026. Control de plagas y Telered con importes estimados.",
+   "Importe": "",
+   "Ref": "",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV004",
+   "Barrio": "S2",
+   "Fecha": "2026-07-24",
+   "Tipo": "Banco",
+   "Hecho": "Transferencia de Galicia a Roela (paga dos veces el impuesto a los débitos y créditos).",
+   "Importe": 3100000,
+   "Ref": "",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV005",
+   "Barrio": "S2",
+   "Fecha": "2026-07-31",
+   "Tipo": "Banco",
+   "Hecho": "El extracto de Roela de julio llega filtrado: solo muestra comisiones; por los saldos salieron más de $ 10 M que no se ven.",
+   "Importe": 10060000,
+   "Ref": "H21",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV006",
+   "Barrio": "S2",
+   "Fecha": "2026-08-16",
+   "Tipo": "Liquidación",
+   "Hecho": "Vence la expensa de 08/2026. Honorarios +4,1% ($ 578.000). Equipo CCTV cobrado con un presupuesto en dólares.",
+   "Importe": 1278320,
+   "Ref": "H24",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV007",
+   "Barrio": "S2",
+   "Fecha": "2026-08-28",
+   "Tipo": "Banco",
+   "Hecho": "Transferencia a la empresa de seguridad.",
+   "Importe": 5840911.47,
+   "Ref": "",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV008",
+   "Barrio": "S2",
+   "Fecha": "2026-08-31",
+   "Tipo": "Liquidación",
+   "Hecho": "Cierre de 08/2026: $ 19,8 M pagados sin gasto liquidado (incluye $ 10 M de pago a cuenta a seguridad). El fondo ordinario cierra en negativo.",
+   "Importe": 19784934.2,
+   "Ref": "H11, H20",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV009",
+   "Barrio": "S2",
+   "Fecha": "2026-09-02",
+   "Tipo": "Banco",
+   "Hecho": "Transferencia a una cuenta del administrador.",
+   "Importe": 1156000,
+   "Ref": "H19",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV010",
+   "Barrio": "S2",
+   "Fecha": "2026-09-09",
+   "Tipo": "Banco",
+   "Hecho": "Segunda transferencia a una cuenta del administrador, sin gasto ni comprobante.",
+   "Importe": 1120000,
+   "Ref": "H19",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV011",
+   "Barrio": "S2",
+   "Fecha": "2026-09-10",
+   "Tipo": "Respuesta",
+   "Hecho": "Responde la administración: Telered baja a $ 100.000, EDENOR provisorio \"se ajustará\", la diferencia de septiembre es \"previsión de morosidad\", reconoce deudas con proveedores de cámaras.",
+   "Importe": "",
+   "Ref": "R3",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV012",
+   "Barrio": "S2",
+   "Fecha": "2026-09-11",
+   "Tipo": "Banco",
+   "Hecho": "Transferencia de Galicia a Roela.",
+   "Importe": 1500000,
+   "Ref": "",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV013",
+   "Barrio": "S2",
+   "Fecha": "2026-09-14",
+   "Tipo": "Reclamo",
+   "Hecho": "Carta 3: pedido de documentación en PDF dentro de 10 días hábiles.",
+   "Importe": "",
+   "Ref": "R4",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV014",
+   "Barrio": "S2",
+   "Fecha": "2026-09-15",
+   "Tipo": "Banco",
+   "Hecho": "Débito automático de servicios, el doble de lo liquidado por Telered en 10/2026, cinco días después de anunciar la baja a $ 100.000.",
+   "Importe": 1135200,
+   "Ref": "H26",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV015",
+   "Barrio": "S2",
+   "Fecha": "2026-09-17",
+   "Tipo": "Propietario",
+   "Hecho": "Pago de la expensa en término, bajo protesta y con reserva de derechos.",
+   "Importe": "",
+   "Ref": "",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV016",
+   "Barrio": "S2",
+   "Fecha": "2026-09-18",
+   "Tipo": "Liquidación",
+   "Hecho": "Vence la expensa de 09/2026: se reparte más que lo gastado (\"previsión de morosidad\"). ARBA: cuotas 59 y 60 otra vez.",
+   "Importe": 1627054.66,
+   "Ref": "H01, H13",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV017",
+   "Barrio": "S2",
+   "Fecha": "2026-09-22",
+   "Tipo": "Respuesta",
+   "Hecho": "La administración pide \"un plazo razonable\" para analizar las observaciones.",
+   "Importe": "",
+   "Ref": "",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV018",
+   "Barrio": "S2",
+   "Fecha": "2026-09-28",
+   "Tipo": "Reclamo",
+   "Hecho": "Vence el plazo de la carta 3, sin respuesta.",
+   "Importe": "",
+   "Ref": "R4",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV019",
+   "Barrio": "S2",
+   "Fecha": "2026-09-30",
+   "Tipo": "Banco",
+   "Hecho": "Pago de la obra de cámaras; al cierre, los bancos tienen $ 4,96 M más que lo informado en la liquidación.",
+   "Importe": 1344000,
+   "Ref": "H30",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV020",
+   "Barrio": "S2",
+   "Fecha": "2026-10-06",
+   "Tipo": "Propietario",
+   "Hecho": "Se informa reparado el cableado expuesto de las cámaras, casi un mes después del pedido.",
+   "Importe": "",
+   "Ref": "H12",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV021",
+   "Barrio": "S2",
+   "Fecha": "2026-10-09",
+   "Tipo": "Reclamo",
+   "Hecho": "Un mes después del planteo, sigue sin respuesta.",
+   "Importe": "",
+   "Ref": "",
+   "Origen": "semilla"
+  },
+  {
+   "ID_Evento": "S2-EV022",
+   "Barrio": "S2",
+   "Fecha": "2026-10-19",
+   "Tipo": "Liquidación",
+   "Hecho": "Vence la expensa de 10/2026. Cargos nuevos sin aviso: luz de sectores comunes ($ 498.204) y cuota anual de ARBA. Honorarios +3,8%. Telered $ 567.600 sin factura. Seguridad por encima de su factura. La obra de cámaras como gasto ordinario. La previsión de septiembre no se devuelve. Cargos particulares +237%.",
+   "Importe": 2191177.6,
+   "Ref": "H23, H26, H28, H30",
+   "Origen": "semilla"
+  }
+ ],
+ "notas": [
+  {
+   "ID_Nota": "S2-RUBRO_3-1",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_3",
+   "Num": 1,
+   "Texto": "La liquidación no informa el período de consumo. 08 y 09/2026 tienen el mismo importe exacto ($ 575.004,20) y están marcados como provisorios. En 08 se liquidó el 2.º vencimiento (recargo de $ 2.487,68). La factura que respalda 09 es de $ 1.119.978 porque arrastra deuda vencida: se pagó tarde. En 10 también se liquidó el 2.º vencimiento (recargo de $ 2.165,08). Pagar a término ahorra el recargo todos los meses."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_3-2",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_3",
+   "Num": 2,
+   "Texto": "Ajuste negativo de $ 27.714,23 marcado como pagado, sin comprobante. Es exactamente la diferencia entre lo que salió de la caja y lo que se detalla como pagado. Pedir la nota de crédito."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_3-3",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_3",
+   "Num": 3,
+   "Texto": "Cargo nuevo desde 10/2026, sin aviso previo ni criterio informado: luz de iluminación troncal y bombas del predio (OP 2485 y 2506), al 8,5947% de dos facturas. Una de ellas es la cuenta industrial 7884753119 que antes estaba dentro del mantenimiento del Fideicomiso. Sin esa cuenta, a Senderos II le correspondían $ 448.880,82 (H04 y H28). Ver la hoja Fideicomiso del cuadro anterior."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_3-4",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_3",
+   "Num": 4,
+   "Texto": "Las cuotas 59 y 60 del plan de pagos de ARBA se liquidaron en 08/2026 y otra vez en 09/2026 ($ 597,44 de más, H13). En 07/2026 no figura la cuota 58."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_3-5",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_3",
+   "Num": 5,
+   "Texto": "Desde 10/2026 se cobra una parte (7,8420%) de la cuota anual del impuesto inmobiliario del predio. El porcentaje no coincide con ningún otro coeficiente. Pedir la boleta y el criterio."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_4-1",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_4",
+   "Num": 1,
+   "Texto": "El detalle mes a mes del mantenimiento del Fideicomiso, la base, los coeficientes y lo que se paga de más está en el cuadro \"Mantenimiento del Fideicomiso\" que ya enviamos. En resumen: la base incluye luz industrial, honorarios de liquidación de sueldos, una factura repetida, cargas de una persona excluida y personal de administración (H04, H05, H06, H25, H29). En 10/2026 se aplicó 12,76% en propios en vez del 13,73% publicado (H32, a favor del barrio). 06 a 08/2026 no informan base ni porcentaje."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_4-2",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_4",
+   "Num": 2,
+   "Texto": "Telered: en 06/2026 se liquidaron 3 meses juntos ($ 548.250) en el rubro 5 (en los demás meses figura en el rubro 4). En 07/2026, importe estimado. El 10/09/2026 la administración informó por escrito que el abono baja a $ 100.000, pero en 10/2026 se liquidaron $ 567.600 sin factura, y el 15/09/2026 el banco debitó $ 1.135.200, el doble de lo liquidado (H09, H26). La Huella paga $ 180.895 por mes por el mismo servicio."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_4-3",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_4",
+   "Num": 3,
+   "Texto": "AdminProp sube todos los meses (+42% entre 06 y 10/2026). Cada factura corresponde a un período dos meses anterior. Es una herramienta del administrador: conviene definir si la paga el barrio o está incluida en los honorarios."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_4-4",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_4",
+   "Num": 4,
+   "Texto": "En 06/2026 se liquidaron dos meses de control de plagas (abril y mayo). En 07/2026 el importe fue estimado ($ 115.000, se pagó $ 110.000 en 08). En 08 se liquidó el servicio de julio y en 09 el de septiembre: no figura el de agosto. En 10/2026, otra vez estimado. Las facturas son de un proveedor y los pagos van a otra persona (H22)."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_5-1",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_5",
+   "Num": 1,
+   "Texto": "En 08/2026 se cobró sobre 17 comprobantes sin detalle (H15). En 09/2026 los comprobantes suman $ 709.063,27 y se declaró $ 709.063,17. En 10/2026 el texto dice \"11 comprobantes\" pero enumera 14, y de $ 751.500,08 solo $ 200.000,08 son tiques fiscales: el resto son presupuestos y notas sin validez (H31). La factura PDA de $ 92.844 de la caja chica de 08 se volvió a cobrar en el mantenimiento de 09 (H25). El texto de la liquidación de 09 trae el detalle; la de 08 no."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_5-2",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_5",
+   "Num": 2,
+   "Texto": "Reparación de control remoto sin comprobante cargado. La factura es de un proveedor y el pago a otra persona (H22)."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_5-3",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_5",
+   "Num": 3,
+   "Texto": "El 12,765% no coincide con ningún coeficiente del barrio (13,73% propios, 12,76% comunes, 13,536% peso total). No se informa el criterio (H02)."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_7-1",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_7",
+   "Num": 1,
+   "Texto": "Aumentos en 08/2026 (+4,1%) y 10/2026 (+3,8%), según la escala CAPHyAI Clase C (orientativa, no obligatoria). La factura cargada (00005-00000027, $ 2.312.000 = 4 × $ 578.000) está emitida al Fideicomiso Bella Vista, no a Senderos II. Pagos al administrador por transferencia sin un gasto que los respalde: $ 2.276.000 en 09/2026 (H19). Pedir factura mensual a nombre del barrio."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_7-2",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_7",
+   "Num": 2,
+   "Texto": "La Huella paga el mismo honorario con 21 lotes: Senderos II paga más por lote ($ 33.333 contra $ 28.571 en 10/2026). Un honorario por lote o con tope sería más parejo."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_8-1",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_8",
+   "Num": 1,
+   "Texto": "Galicia: en 09/2026 se liquidaron $ 105.000 \"estimados, no facturados\" porque no está el extracto de agosto. En 06 y 07/2026 Galicia cobró $ 376.143,01 y $ 320.679,81, sin extracto para verificar."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_8-2",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_8",
+   "Num": 2,
+   "Texto": "Roela: los importes coinciden al centavo con lo debitado el mes anterior. La cuenta está a nombre del administrador, no del barrio (H18), y el extracto de julio llegó filtrado (H21)."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_8-3",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_8",
+   "Num": 3,
+   "Texto": "La comisión más grande es la de cobranza por Pago Fácil y otros medios en efectivo ($ 231.684 solo Pago Fácil en septiembre). Promover el pago por transferencia o débito automático reduce este costo."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_8-4",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_8",
+   "Num": 4,
+   "Texto": "Con dos cuentas, las transferencias entre ellas pagan el impuesto a los débitos y créditos dos veces (en 07/2026 se transfirieron $ 3.100.000 y en 09/2026 $ 1.500.000 desde Galicia)."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_8-5",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_8",
+   "Num": 5,
+   "Texto": "Mantener dos cuentas cuesta dos mantenimientos ($ 75.000 + $ 13.237 por mes). Una sola cuenta, a nombre del barrio, ahorra al menos el mantenimiento de una de ellas."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_8-6",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_8",
+   "Num": 6,
+   "Texto": "Galicia retiene Ingresos Brutos sobre las acreditaciones ($ 42.363 en septiembre). Un consorcio sin fines de lucro puede pedir la exención o el certificado de no retención en ARBA: a verificar con un contador."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_10-1",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_10",
+   "Num": 1,
+   "Texto": "Importe fijo. Falta la póliza: qué cubre, suma asegurada, vencimiento y si el personal del predio tiene ART y seguro de vida (lo paga el Fideicomiso). Conviene cotizar con otra aseguradora una vez por año. La Huella paga casi lo mismo con otra póliza: se podría contratar una sola para los tres barrios."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_11-1",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_11",
+   "Num": 1,
+   "Texto": "Hasta 09/2026 la factura de seguridad era compartida con Senderos I (\"SENDEROS 1 Y 2\") y se repartió mitad y mitad. Por cantidad de lotes (18 de 39), Senderos II pagó de más todos los meses (H08). Para 06 y 07/2026 la factura total no está cargada: se toma el doble de lo liquidado (REVISAR)."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_11-2",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_11",
+   "Num": 2,
+   "Texto": "Bidones de agua sin comprobante cargado; mismo importe exacto en 09 y 10/2026."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_11-3",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_11",
+   "Num": 3,
+   "Texto": "Equipo de monitoreo cobrado como gasto ordinario con un presupuesto en dólares (US$ 1.682), sin factura (H24). Una compra de equipos es gasto extraordinario y necesita presupuesto aprobado."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_11-4",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_11",
+   "Num": 4,
+   "Texto": "Terminación de obra civil de las cámaras (factura C 00002-00000159), cobrada como gasto ordinario (H30). Una obra se paga con el fondo extraordinario ($ 1.659.305,82 disponibles). Además hay deuda con proveedores de cámaras que no aparece en las cuentas ($ 23.784.934,20 según la auditoría, H11)."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_11-5",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_11",
+   "Num": 5,
+   "Texto": "Desde 10/2026 Senderos II tiene su propia factura, por $ 5.738.468,08, pero se liquidaron $ 5.880.744,15: $ 142.276,07 de más, el 3% de percepción de Ingresos Brutos que la factura no tiene (H23)."
+  },
+  {
+   "ID_Nota": "S2-RUBRO_11-6",
+   "Barrio": "S2",
+   "Ambito": "RUBRO_11",
+   "Num": 6,
+   "Texto": "A La Huella se le liquidó exactamente el mismo importe al centavo en 08, 09 y 10/2026, aunque tiene su propia factura (FC06571, FC06661) y otra cantidad de lotes. En 10/2026 el importe de Senderos II coincide con el de La Huella, no con su factura."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-1",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 1,
+   "Texto": "En 09/2026 incluye $ 547.755 al fondo extraordinario: coincide con un cargo particular de 08/2026. Los cobros de expensas se mezclan con los de meses anteriores: la liquidación no informa cuánto se cobró de la expensa de cada mes."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-2",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 2,
+   "Texto": "Plata que entró y no se sabe de qué lote es. Cada mes quedan entre $ 0,5 M y $ 1,3 M sin identificar; $ 500.000 de 08/2026 siguen sin identificar en 10/2026."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-3",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 3,
+   "Texto": "Los informa la propia liquidación como \"egreso sin detalle de comprobante\": no hay un gasto del mes ni una factura que los respalde. En 08/2026 son $ 19,8 M, casi dos veces el gasto del mes, entre ellos $ 10 M de \"pago a cuenta\" a la empresa de seguridad (H11, H20). Además, el extracto de Roela de 07/2026 llegó filtrado: por los saldos, salieron más de $ 10 M que no se ven (H21)."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-4",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 4,
+   "Texto": "En 08/2026, \"diferencia de saldo inicial con la administración anterior\" ($ 489.324,19) sin motivo. En 09/2026, \"ajuste honorarios estudio bonificados\" ($ 799.729,84), sin gasto ni explicación (H14)."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-5",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 5,
+   "Texto": "El total de saldos pendientes de pago debería ser igual o mayor que lo pendiente solo del mes, porque lo incluye. En 07, 08 y 10/2026 es menor: los dos números no pueden ser correctos a la vez. Pedir el listado de deudas con cada proveedor."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-6",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 6,
+   "Texto": "En 09/2026 se repartió $ 1.627.054,66 más que lo gastado como \"previsión de morosidad\" (H01). En 10/2026 los lotes con deuda pagaron (de 5 a 4 lotes, $ 2,6 M menos de deuda) y la previsión no se devolvió ni se acreditó."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-7",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 7,
+   "Texto": "En 08/2026 el fondo ordinario cerró en negativo (−$ 350.258,39): se pagaron gastos ordinarios con plata del fondo extraordinario. No hay fondo de reserva."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-8",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 8,
+   "Texto": "Saldo impago de la factura de seguridad de 08/2026 ($ 3.654.176,39) que no se resta del patrimonio (H20). Tampoco figura la deuda con los proveedores de cámaras que reconoce la administración ($ 23.784.934,20 según la auditoría, H11)."
+  },
+  {
+   "ID_Nota": "S2-FLUJO-9",
+   "Barrio": "S2",
+   "Ambito": "FLUJO",
+   "Num": 9,
+   "Texto": "Al 30/09/2026 los bancos suman $ 8.596.500,30 y la liquidación informa $ 3.631.914,46. Al 28/08/2026 solo Roela tenía $ 4.060.839,34, contra $ 698.625,16 informados en total. La diferencia puede deberse a pagos registrados y todavía no debitados, pero eso se demuestra con una conciliación bancaria, que la liquidación no presenta. La cuenta Roela está a nombre del administrador (H18). Faltan los extractos de Galicia de 08/2026 y de los dos bancos de 10/2026."
+  },
+  {
+   "ID_Nota": "S2-ACUMULADO-1",
+   "Barrio": "S2",
+   "Ambito": "ACUMULADO",
+   "Num": 1,
+   "Texto": "De 06 a 08/2026 solo se corrige lo que se puede verificar: la seguridad por lotes (para 06 y 07 la factura total se toma como el doble de lo liquidado, REVISAR), el equipo CCTV cobrado con presupuesto y el recargo de luz. No se corrigen el mantenimiento del Fideicomiso, la caja chica ni Telered porque esas liquidaciones no informan la base ni los comprobantes. Por eso la diferencia de esos meses es un piso: la real es mayor."
+  },
+  {
+   "ID_Nota": "S2-ACUMULADO-2",
+   "Barrio": "S2",
+   "Ambito": "ACUMULADO",
+   "Num": 2,
+   "Texto": "Proyección simple: supone que cada mes se repiten los desvíos de octubre (Telered, luz del Fideicomiso, caja chica, mantenimiento, seguridad por encima de la factura) salvo la obra de cámaras. No incluye aumentos de precios. Se calcula con el coeficiente del lote común (1 ÷ 17,65)."
+  },
+  {
+   "ID_Nota": "S2-RESUMEN-1",
+   "Barrio": "S2",
+   "Ambito": "RESUMEN",
+   "Num": 1,
+   "Texto": "En 09/2026 se repartieron $ 1.627.054,66 más de lo gastado (17%), llamado \"previsión de morosidad\", sin línea propia ni regla de devolución (H01). Los demás meses se repartieron unos $ 35 a $ 46 menos que el gasto, por redondeo de la cuota, sin informarlo."
+  },
+  {
+   "ID_Nota": "S2-RESUMEN-2",
+   "Barrio": "S2",
+   "Ambito": "RESUMEN",
+   "Num": 2,
+   "Texto": "El lote de coeficiente reducido paga el 65% de un lote común. La cuota del lote común es exactamente el repartido ÷ 17,65 lotes equivalentes. El coeficiente no figura en la liquidación ni hay reglamento que lo respalde (REVISAR)."
+  },
+  {
+   "ID_Nota": "S2-RESUMEN-3",
+   "Barrio": "S2",
+   "Ambito": "RESUMEN",
+   "Num": 3,
+   "Texto": "Los cargos particulares (canon de obra y otros) los pagan solo algunos lotes. En 10/2026 subieron 237% sin detalle. La administración no publica qué conceptos son ni a qué fondo van."
+  },
+  {
+   "ID_Nota": "S2-RESUMEN-4",
+   "Barrio": "S2",
+   "Ambito": "RESUMEN",
+   "Num": 4,
+   "Texto": "Diferencia entre lo que se repartió a los lotes y el gasto correcto. En 09/2026 incluye la previsión de $ 1.627.054,66. Las correcciones de cada rubro están en su hoja (bloque \"Liquidación correcta\") y su origen, en las notas de cada hoja."
+  },
+  {
+   "ID_Nota": "S2-RESUMEN-6",
+   "Barrio": "S2",
+   "Ambito": "RESUMEN",
+   "Num": 6,
+   "Texto": "En 07/2026 el total de expensas informado es $ 0,14 menor que repartido + particulares, y en 08/2026 $ 0,22 mayor. Son centavos, pero muestran que el total no sale de sumar sus partes: la liquidación no informa de dónde vienen."
+  },
+  {
+   "ID_Nota": "S2-RESUMEN-5",
+   "Barrio": "S2",
+   "Ambito": "RESUMEN",
+   "Num": 5,
+   "Texto": "Fuentes: liquidaciones de expensas de Senderos II de 06 a 10/2026, comprobantes cargados en la auditoría y extractos bancarios disponibles (Roela 07 a 09, Galicia 07 y 09). Las observaciones son indicadores para revisar, no acusaciones."
+  }
+ ]
+}
