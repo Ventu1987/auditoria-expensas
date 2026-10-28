@@ -716,24 +716,6 @@
    "Publicable": "SI"
   },
   {
-   "ID_Hallazgo": "N-02",
-   "Barrios": "S2",
-   "Titulo": "El total de deudas con proveedores es menor que lo pendiente solo del mes",
-   "Conclusion": "",
-   "Gravedad": "IMPORTANTE",
-   "Monto": "",
-   "Base_Monto": "sin monto",
-   "Probabilidad": "Alta",
-   "Por_Que_Probabilidad": "Pasa en 07, 08 y 10/2026.",
-   "Donde_Verlo": "Flujo de fondos",
-   "Que_Pedir": "Listado de deudas con cada proveedor.",
-   "Estado_Reclamo": "NUEVO",
-   "Lo_Que_Muestran": "",
-   "Fecha_Alta": "2026-10-21",
-   "Fecha_Solucion": "",
-   "Publicable": "SI"
-  },
-  {
    "ID_Hallazgo": "N-03",
    "Barrios": "S2",
    "Titulo": "Cobros que no se sabe de qué lote son",
@@ -1355,13 +1337,6 @@
    "Texto": "En 08/2026, \"diferencia de saldo inicial con la administración anterior\" ($ 489.324,19) sin motivo. En 09/2026, \"ajuste honorarios estudio bonificados\" ($ 799.729,84), sin gasto ni explicación (H14)."
   },
   {
-   "ID_Nota": "S2-FLUJO-5",
-   "Barrio": "S2",
-   "Ambito": "FLUJO",
-   "Num": 5,
-   "Texto": "El total de saldos pendientes de pago debería ser igual o mayor que lo pendiente solo del mes, porque lo incluye. En 07, 08 y 10/2026 es menor: los dos números no pueden ser correctos a la vez. Pedir el listado de deudas con cada proveedor."
-  },
-  {
    "ID_Nota": "S2-FLUJO-6",
    "Barrio": "S2",
    "Ambito": "FLUJO",
@@ -1444,6 +1419,27 @@
    "Ambito": "RESUMEN",
    "Num": 5,
    "Texto": "Fuentes: liquidaciones de expensas de Senderos II de 06 a 10/2026, comprobantes cargados en la auditoría y extractos bancarios disponibles (Roela 07 a 09, Galicia 07 y 09). Las observaciones son indicadores para revisar, no acusaciones."
+  },
+  {
+   "ID_Nota": "S2-NOV-2026-10-1",
+   "Barrio": "S2",
+   "Ambito": "NOVEDAD:2026-10:Mantenimiento Fideicomiso - espacios propios 80%",
+   "Num": 1,
+   "Texto": "No es una baja real: desde octubre la luz del Fideicomiso sale del mantenimiento y se cobra aparte como «Luz sectores comunes» ($ 498.204). Mantenimiento propios + comunes ($ 1.181.915,45) más esa luz suman $ 1.680.119,45, contra $ 1.443.644,68 de septiembre: en realidad sube $ 236.474,77 (+16,4%)."
+  },
+  {
+   "ID_Nota": "S2-NOV-2026-10-2",
+   "Barrio": "S2",
+   "Ambito": "NOVEDAD:2026-10:Electricidad sectores comunes - Fideicomiso",
+   "Num": 1,
+   "Texto": "Es la luz que hasta septiembre estaba dentro del mantenimiento del Fideicomiso, con una cuenta industrial incluida (H28). Se cobra aparte desde octubre, sin aviso previo. Sumada al mantenimiento, el barrio paga $ 236.474,77 más que en septiembre."
+  },
+  {
+   "ID_Nota": "S2-NOV-2026-10-3",
+   "Barrio": "S2",
+   "Ambito": "NOVEDAD:2026-10:Telered",
+   "Num": 1,
+   "Texto": "Gravísimo: el 10/09/2026 el administrador informó por escrito que el abono bajaba de unos $ 200.000 ($ 192.855 en septiembre) a $ 100.000. En octubre se liquidaron $ 567.600, 5,7 veces lo prometido y sin factura. Además, el 15/09 el banco debitó $ 1.135.200 (H26)."
   }
  ]
 }

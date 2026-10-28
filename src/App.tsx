@@ -8,10 +8,12 @@ import { Cargar } from './pantallas/Cargar';
 import { Comprobantes } from './pantallas/Comprobantes';
 import { Editar } from './pantallas/Editar';
 import { Admin } from './pantallas/Admin';
+import { ExpensaNueva } from './pantallas/ExpensaNueva';
 import { descargarExcel } from './lib/excel';
-import { mesLargo, pesos } from './ui/formato';
+import { Novedades } from './ui/Novedades';
 
 const HERRAMIENTAS = [
+  { id: 'expensa', titulo: 'Expensa nueva', C: ExpensaNueva },
   { id: 'cargar', titulo: 'Cargar expensa', C: Cargar },
   { id: 'comprobantes', titulo: 'Comprobantes', C: Comprobantes },
   { id: 'editar', titulo: 'Corregir y comentar', C: Editar },
@@ -48,24 +50,6 @@ function Clave() {
   );
 }
 
-function Novedades({ A }: { A: ReturnType<typeof analizar> }) {
-  if (!A.novedades.length) return null;
-  const mes = A.meses.at(-1)!;
-  return (
-    <section className="card">
-      <h2>Novedades de {mesLargo(mes)}</h2>
-      <ul className="novedades">
-        {A.novedades.map((n, i) => (
-          <li key={i} className={n.tipo}>
-            {n.texto}
-            {n.importe !== undefined && <span className="num"> · {pesos(n.importe)}</span>}
-          </li>
-        ))}
-      </ul>
-    </section>
-  );
-}
-
 export default function App() {
   const s = useApp();
   useEffect(() => {
@@ -85,7 +69,7 @@ export default function App() {
         <div className="marca">
           <strong>Auditoría de expensas</strong>
           <span className={`chip ${s.origen === 'api' ? 'ok' : 'rev'}`} title={s.detalle}>
-            {s.cargando ? 'Cargando…' : s.origen === 'api' ? 'Planilla en vivo' : 'Copia'}
+            {s.cargando ? 'Leyendo la planilla…' : s.origen === 'api' ? 'Planilla en vivo' : 'Copia'}
           </span>
         </div>
         <div className="controles-barra">
@@ -109,20 +93,33 @@ export default function App() {
         </div>
       </header>
       <nav className="pestanas" aria-label="Secciones">
+        <button className={`destacada ${s.tab === 'expensa' ? 'activa' : ''}`} onClick={() => s.setTab('expensa')}>
+          Expensa nueva
+        </button>
+        <span className="sep" />
         {pestanas.map((p) => (
           <button key={p.id} className={actual?.id === p.id ? 'activa' : ''} onClick={() => s.setTab(p.id)} title={p.corto}>
             {p.titulo}
           </button>
         ))}
         <span className="sep" />
-        {HERRAMIENTAS.map((h) => (
+        {HERRAMIENTAS.filter((h) => h.id !== 'expensa').map((h) => (
           <button key={h.id} className={`herr ${s.tab === h.id ? 'activa' : ''}`} onClick={() => s.setTab(h.id)}>
             {h.titulo}
           </button>
         ))}
       </nav>
       <main>
-        {s.origen === 'copia' && !s.cargando && <p className="aviso rev small">{s.detalle}</p>}
+        {s.origen === 'copia' && (
+          <p className="aviso rev small banner-origen">
+            {s.cargando ? 'Leyendo la planilla… (la primera vez puede tardar hasta un minuto). Mientras tanto se ve la copia incluida.' : s.detalle}{' '}
+            {!s.cargando && (
+              <button className="link" onClick={() => s.recargar()}>
+                Reintentar
+              </button>
+            )}
+          </p>
+        )}
         {A && !A.meses.length && !herr && <p className="aviso">Este barrio todavía no tiene liquidaciones cargadas. Usá "Cargar expensa".</p>}
         {herr ? (
           <herr.C />
@@ -130,7 +127,7 @@ export default function App() {
           actual &&
           A && (
             <div className="pila">
-              {actual.id === 'resumen' && <Novedades A={A} />}
+              {actual.id === 'resumen' && <Novedades lista={A.novedades} mes={A.meses.at(-1)!} />}
               {actual.id === 'matriz' && <GrillaRiesgo M={A.matriz} />}
               {actual.tablas.map((t) => (
                 <Tabla key={t.id} t={t} />

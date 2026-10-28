@@ -116,13 +116,25 @@ export const ESQUEMA = {
     id: 'Concepto',
     publica: true,
     descripcion: 'Conceptos normalizados y el patrón (expresión regular) con el que el lector los reconoce en el PDF. Se evalúan en orden.',
-    columnas: ['Concepto', 'Etiqueta', 'Patron', 'Orden'],
+    columnas: ['Concepto', 'Etiqueta', 'Patron', 'Orden', 'Que_Es'],
   },
   INDICES: {
     id: 'Mes',
     publica: true,
     descripcion: 'Inflación mensual del INDEC, solo como dato de referencia.',
     columnas: ['Mes', 'IPC_Var_Mensual', 'Fuente'],
+  },
+  EXPENSA_NUEVA: {
+    id: 'ID_Linea',
+    publica: true,
+    descripcion: 'Expensa nueva para los propietarios: por concepto y mes, la explicación en palabras simples y si se puede ahorrar.',
+    columnas: ['ID_Linea', 'Barrio', 'Mes', 'Concepto', 'Explicacion', 'Ahorrable', 'Ahorro_Estimado', 'Nota_Ahorro'],
+  },
+  EXPENSA_ESTADO: {
+    id: 'ID_Expensa',
+    publica: true,
+    descripcion: 'Estado de la expensa nueva de cada mes: BORRADOR (solo la ve quien tiene la clave) o PUBLICADA. Mensaje: el texto de arriba.',
+    columnas: ['ID_Expensa', 'Barrio', 'Mes', 'Estado', 'Mensaje', 'Fecha_Publicacion'],
   },
   CARGAS: {
     id: 'ID_Carga',

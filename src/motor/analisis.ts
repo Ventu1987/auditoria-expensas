@@ -80,7 +80,6 @@ export function flujo(base: Base, barrio: string, ctxIn?: Ctx) {
     pctPagado: M.map((_, i) => (gasto[i] ? pagadoMes[i] / gasto[i] : null)),
     pendMes,
     pendTotal,
-    pendDif: M.map((_, i) => (pendMes[i] !== null && pendTotal[i] !== null ? pendTotal[i]! - pendMes[i]! : null)),
     pagosAnteriores: M.map((m) => (hay(P(m).Pagos_Periodos_Anteriores) ? c(P(m).Pagos_Periodos_Anteriores) : null)),
     deudas: M.map((m) => (hay(P(m).Deudas_A_Cobrar) ? c(P(m).Deudas_A_Cobrar) : null)),
     intereses: M.map((m) => (hay(P(m).Intereses_A_Cobrar) ? c(P(m).Intereses_A_Cobrar) : null)),
@@ -277,6 +276,7 @@ export function ahorros(base: Base, barrio: string, ctxIn?: Ctx) {
     return {
       id: String(x.ID_Medida), grupo, medida: String(x.Medida), hoy: String(x.Hoy ?? ''), propuesta: String(x.Propuesta ?? ''), base: String(x.Base ?? ''), ref: String(x.Ref ?? ''), mes,
       mensual, lote, anualLote: lote === null ? null : grupo === 'C' ? lote : lote * 12,
+      origen: calc.startsWith('CORRECCION:') ? `liquidación correcta ${mes.slice(5)}/${mes.slice(0, 4)}: liquidado − correcto` : calc.startsWith('CONCEPTO:') ? `lo liquidado en ${mes.slice(5)}/${mes.slice(0, 4)}` : mensual === null ? 'sin dato' : 'importe cargado a mano (hoja MEDIDAS)',
       supuesto: /supuesto|propuesta|sin cotiz/i.test(String(x.Base ?? '')),
     };
   });
@@ -370,7 +370,15 @@ export interface Novedad {
   tipo: 'nuevo' | 'falta' | 'aumento' | 'baja' | 'estimado' | 'repetido' | 'control' | 'reparto' | 'cuota';
   texto: string;
   importe?: Cents;
+  /** concepto (o tipo) al que se le puede escribir una aclaración */
+  clave: string;
+  aclaracion?: string;
+  idNota?: string;
 }
+
+/** Servicios por consumo: que repitan el importe exacto es raro (un abono fijo no). */
+const POR_CONSUMO = /Electricidad|EDENOR|\bagua\b|\bgas\b/i;
+const pct1 = (x: number) => `${(Math.round(x * 1000) / 10).toString().replace('.', ',')}%`;
 
 export function novedades(base: Base, barrio: string, mes: string, ctxIn?: Ctx): Novedad[] {
   const ctx = ctxIn ?? contexto(base, barrio);
@@ -384,32 +392,66 @@ export function novedades(base: Base, barrio: string, mes: string, ctxIn?: Ctx):
     return r;
   };
   const hoy = porConcepto(mes);
+  const antes = ant ? porConcepto(ant) : new Map<string, Cents>();
+  let cuota: Novedad | null = null;
   if (ant) {
-    const antes = porConcepto(ant);
     for (const [k, v] of hoy) {
       const e = etiqueta(base, k);
-      if (!antes.has(k)) out.push({ tipo: 'nuevo', texto: `Cargo nuevo: ${e}`, importe: v });
+      if (!antes.has(k)) out.push({ tipo: 'nuevo', texto: `Cargo nuevo: ${e}`, importe: v, clave: k });
       else {
         const a = antes.get(k)!;
         const d = a ? (v - a) / Math.abs(a) : 0;
-        if (Math.abs(d) >= 0.1 && Math.abs(v - a) >= 5000000) out.push({ tipo: d > 0 ? 'aumento' : 'baja', texto: `${e}: ${d > 0 ? 'sube' : 'baja'} ${Math.round(d * 1000) / 10}% respecto del mes anterior`, importe: v - a });
-        if (v === a && ctx.gastos(mes).some((g) => g.Concepto === k && (g.Es_Estimado === 'SI' || g.Es_Provisorio === 'SI'))) out.push({ tipo: 'repetido', texto: `${e}: mismo importe exacto que el mes anterior, estimado o provisorio`, importe: v });
+        if (Math.abs(d) >= 0.1 && Math.abs(v - a) >= 5000000) out.push({ tipo: d > 0 ? 'aumento' : 'baja', texto: `${e}: ${d > 0 ? 'sube' : 'baja'} ${pct1(Math.abs(d))} respecto del mes anterior`, importe: v - a, clave: k });
+        if (v === a && POR_CONSUMO.test(k) && ctx.gastos(mes).some((g) => g.Concepto === k && (g.Es_Estimado === 'SI' || g.Es_Provisorio === 'SI')))
+          out.push({ tipo: 'repetido', texto: `${e}: mismo importe exacto que el mes anterior, y provisorio`, importe: v, clave: k });
       }
     }
-    for (const [k, v] of antes) if (!hoy.has(k)) out.push({ tipo: 'falta', texto: `No figura este mes: ${etiqueta(base, k)}`, importe: -v });
-    const P0 = ctx.periodo(ant)!;
-    const P1 = ctx.periodo(mes)!;
-    const c0 = c(P0.Cuota_Lote_Comun);
-    const c1 = c(P1.Cuota_Lote_Comun);
-    if (c0) out.push({ tipo: 'cuota', texto: `Cuota del lote común: ${Math.round(((c1 - c0) / c0) * 1000) / 10}% respecto del mes anterior`, importe: c1 - c0 });
+    for (const [k, v] of antes) if (!hoy.has(k)) out.push({ tipo: 'falta', texto: `No figura este mes: ${etiqueta(base, k)}`, importe: -v, clave: k });
+    const c0 = c(ctx.periodo(ant)!.Cuota_Lote_Comun);
+    const c1 = c(ctx.periodo(mes)!.Cuota_Lote_Comun);
+    if (c0) cuota = { tipo: 'cuota', texto: `Cuota del lote común: ${c1 >= c0 ? 'sube' : 'baja'} ${pct1(Math.abs((c1 - c0) / c0))} respecto del mes anterior`, importe: c1 - c0, clave: 'CUOTA' };
   }
-  for (const g of ctx.gastos(mes)) if (g.Es_Estimado === 'SI' || g.Es_Provisorio === 'SI') out.push({ tipo: 'estimado', texto: `${etiqueta(base, String(g.Concepto))}: importe ${g.Es_Estimado === 'SI' ? 'estimado' : 'provisorio'}`, importe: c(g.Importe) });
+  for (const g of ctx.gastos(mes)) {
+    if (g.Es_Estimado !== 'SI' && g.Es_Provisorio !== 'SI') continue;
+    const k = String(g.Concepto);
+    // un abono estimado con el mismo importe que el mes anterior no es novedad
+    if (antes.get(k) === hoy.get(k) && !POR_CONSUMO.test(k)) continue;
+    out.push({ tipo: 'estimado', texto: `${etiqueta(base, k)}: importe ${g.Es_Estimado === 'SI' ? 'estimado' : 'provisorio'}, sin factura`, importe: c(g.Importe), clave: `${k}#estimado` });
+  }
   const P = ctx.periodo(mes)!;
   const gasto = sum(ctx.gastos(mes).map((g) => c(g.Importe)));
   const dif = c(P.Repartido) - gasto;
-  if (Math.abs(dif) >= 100000) out.push({ tipo: 'reparto', texto: dif > 0 ? 'Se repartió entre los lotes más de lo que se gastó' : 'Se repartió entre los lotes menos de lo que se gastó', importe: dif });
-  for (const f of String(P.Controles_Fallidos ?? '').split('|').filter(Boolean)) out.push({ tipo: 'control', texto: `El documento no cierra: ${f}` });
+  if (Math.abs(dif) >= 100000) out.push({ tipo: 'reparto', texto: dif > 0 ? 'Se repartió entre los lotes más de lo que se gastó' : 'Se repartió entre los lotes menos de lo que se gastó', importe: dif, clave: 'REPARTO' });
+  for (const f of String(P.Controles_Fallidos ?? '').split('|').filter(Boolean)) {
+    const m = f.match(/diferencia \$ (-?[\d.]+,\d{2})/);
+    const imp = m ? c(m[1].replace(/\./g, '').replace(',', '.')) : undefined;
+    out.push({ tipo: 'control', texto: `El documento no cierra: ${f.replace(/\s*\(diferencia[^)]*\)/, '')}`, importe: imp === undefined ? undefined : Math.abs(imp), clave: `CONTROL:${f.slice(0, 40)}` });
+  }
+  // de mayor a menor monto; las bajas al final, de la más grande a la más chica; la cuota siempre última
+  const orden = (n: Novedad) => (n.importe === undefined ? 0 : n.importe);
+  out.sort((a, b) => {
+    const x = orden(a), y = orden(b);
+    if (x >= 0 && y >= 0) return y - x;
+    if (x < 0 && y < 0) return x - y;
+    return x >= 0 ? -1 : 1;
+  });
+  if (cuota) out.push(cuota);
+  // aclaraciones escritas a mano (hoja NOTAS, ámbito NOVEDAD:<mes>:<clave>)
+  for (const n of out) {
+    const nota = base.NOTAS.find((x) => (x.Barrio === barrio || x.Barrio === 'TODOS') && x.Ambito === `NOVEDAD:${mes}:${n.clave}`);
+    if (nota) {
+      n.aclaracion = String(nota.Texto);
+      n.idNota = String(nota.ID_Nota);
+    }
+  }
   return out;
+}
+
+/** Color de una novedad según su monto: más de $ 100.000 rojo, hasta $ 99.999,99 amarillo, negativo verde. */
+export function colorNovedad(importe: Cents | undefined): 'mas' | 'rev' | 'ok' | '' {
+  if (importe === undefined) return 'rev';
+  if (importe < 0) return 'ok';
+  return importe >= 10000000 ? 'mas' : 'rev';
 }
 
 // ================================================================ todo junto

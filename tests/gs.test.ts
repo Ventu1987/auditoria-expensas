@@ -84,7 +84,7 @@ describe('Apps Script', () => {
     const E = crearEntorno();
     (E.ctx.prepararPlanilla as () => string)();
     expect(E.hojas.get('GASTOS')![0][0]).toBe('ID_Gasto');
-    expect(E.hojas.size).toBe(18);
+    expect(E.hojas.size).toBe(20);
   });
 
   it('con la planilla inicial ya subida, preparar no borra nada y la API la publica', () => {
@@ -103,6 +103,25 @@ describe('Apps Script', () => {
     expect(d.sheets.GASTOS.length).toBe(112);
     expect(d.sheets.PERIODOS.length).toBe(9);
     expect(E.hojas.has('LEEME')).toBe(true);
+  });
+
+  it('actualiza una planilla de la v1 sin perder datos: agrega hojas y columnas nuevas', () => {
+    const E = crearEntorno();
+    const ESQ = vm.runInContext('ESQUEMA', E.ctx as never) as Record<string, { columnas: string[] }>;
+    for (const [h, def] of Object.entries(ESQ)) {
+      if (h.startsWith('EXPENSA_')) continue; // la v1 no las tenía
+      const cols = h === 'CONCEPTOS' ? def.columnas.filter((c) => c !== 'Que_Es') : def.columnas;
+      const filas = ((copia.sheets as Record<string, Record<string, unknown>[]>)[h] ?? []).map((f) => cols.map((c) => (f[c] ?? '') as string | number));
+      E.hojas.set(h, [cols, ...filas]);
+    }
+    (E.ctx.prepararPlanilla as () => string)();
+    expect(E.hojas.has('EXPENSA_NUEVA')).toBe(true);
+    expect(E.hojas.get('CONCEPTOS')![0].at(-1)).toBe('Que_Es');
+    expect(E.get().sheets.GASTOS.length).toBe(112);
+    const r = E.post({ accion: 'guardar', barrio: 'S2', clave: 's2', hoja: 'EXPENSA_NUEVA', filas: [{ ID_Linea: 'S2-2026-10-Telered', Barrio: 'S2', Mes: '2026-10', Concepto: 'Telered', Explicacion: 'Prueba', Ahorrable: 'SI', Ahorro_Estimado: 467600 }] });
+    expect(r.ok).toBe(true);
+    expect(E.get().sheets.EXPENSA_NUEVA[0].Ahorrable).toBe('SI');
+    expect(E.post({ accion: 'guardar', barrio: 'S2', clave: 's2', hoja: 'EXPENSA_ESTADO', filas: [{ ID_Expensa: 'S2-2026-10', Barrio: 'S2', Mes: '2026-10', Estado: 'PUBLICADA' }] }).ok).toBe(true);
   });
 
   it('migra, lee por barrio y no publica CARGAS', () => {

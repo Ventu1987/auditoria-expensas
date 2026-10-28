@@ -16,9 +16,9 @@
  *   verificar · subirArchivo · cargarLiquidacion · guardar · borrar · enlace · migrar
  */
 
-var VERSION = '1.0';
+var VERSION = '1.1';
 var ADMIN_CUIT = '20-25787636-6'; // el único CUIT de persona física que se publica (el del administrador)
-var EDITABLES = ['COMPROBANTES', 'CORRECCIONES', 'HALLAZGOS', 'EVENTOS', 'NOTAS', 'MEDIDAS', 'MOVIMIENTOS_BANCO', 'GASTOS', 'CONCEPTOS', 'INDICES', 'BARRIOS'];
+var EDITABLES = ['COMPROBANTES', 'CORRECCIONES', 'HALLAZGOS', 'EVENTOS', 'NOTAS', 'MEDIDAS', 'MOVIMIENTOS_BANCO', 'GASTOS', 'CONCEPTOS', 'INDICES', 'BARRIOS', 'EXPENSA_NUEVA', 'EXPENSA_ESTADO'];
 var POR_MES = ['PERIODOS', 'GASTOS', 'FLUJO', 'PAGOS_ANTERIORES', 'PENDIENTES', 'NO_IDENTIFICADOS', 'COEFICIENTES'];
 var TEXTO = /^(Mes|Fecha.*|Periodo_.*|Mes_Origen|ID_.*|Lote|Item|Recargo|Coef_Pct|CUIT.*|Numero)$/;
 

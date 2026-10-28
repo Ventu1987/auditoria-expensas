@@ -15,6 +15,10 @@ export interface FilaT {
   celdas?: (Estilo | undefined)[];
   variacion?: boolean;
   nota?: string;
+  /** de dónde sale el dato: se muestra al final del concepto */
+  fuente?: string;
+  /** ancla para llegar a la fila (por ejemplo desde la matriz) */
+  id?: string;
 }
 export interface TablaT {
   id: string;
@@ -28,6 +32,10 @@ export interface TablaT {
   notas?: { num: number; texto: string }[];
   /** ancho sugerido de la primera columna (caracteres) */
   ancho?: number;
+  /** ancho mínimo de cada columna de texto (em) */
+  anchos?: (number | undefined)[];
+  /** la tabla ocupa solo lo que necesita (no todo el ancho) */
+  compacta?: boolean;
 }
 export interface Pestana {
   id: string;
@@ -53,33 +61,33 @@ export function pestanaResumen(A: Analisis): Pestana {
     ancho: 60,
     filas: [
       sec('Gastos del mes por rubro (lo que liquidó la administración)'),
-      ...R.rubros.map((r) => ({ texto: r.nombre, valores: r.serie, formato: 'money' as const, variacion: true })),
-      { texto: 'Total de gastos del mes (suma de los rubros)', valores: R.gasto, formato: 'money', estilo: 'total', variacion: true },
-      { texto: 'Total de gastos informado en la liquidación', valores: R.gastoInformado, formato: 'money' },
-      { texto: 'Control: suma de rubros menos lo informado', valores: R.controlGasto, formato: 'money', estilo: 'ok', celdas: R.controlGasto.map((v) => (v ? 'mas' : undefined)) },
+      ...R.rubros.map((r) => ({ texto: r.nombre, fuente: `suma de los gastos del rubro (pestaña ${r.nombre.split('.')[0]})`, valores: r.serie, formato: 'money' as const, variacion: true })),
+      { texto: 'Total de gastos del mes (suma de los rubros)', fuente: 'suma de las filas de rubros de arriba', valores: R.gasto, formato: 'money', estilo: 'total', variacion: true },
+      { texto: 'Total de gastos informado en la liquidación', fuente: 'liquidación de RyM: «Total de gastos»', valores: R.gastoInformado, formato: 'money' },
+      { texto: 'Control: suma de rubros menos lo informado', fuente: 'total de gastos − informado (tiene que dar 0)', valores: R.controlGasto, formato: 'money', estilo: 'ok', celdas: R.controlGasto.map((v) => (v ? 'mas' : undefined)) },
       sec('De los gastos a la cuota'),
-      { texto: 'Total repartido entre los lotes (informado)', valores: R.repartido, formato: 'money', variacion: true },
-      { texto: 'Repartido menos gastado', valores: R.repartidoMenosGasto, formato: 'money', celdas: R.repartidoMenosGasto.map((v) => (v !== null && Math.abs(v) >= 100000 ? 'mas' : undefined)) },
-      { texto: 'Cuota del lote común (informada)', valores: R.cuota, formato: 'money', estilo: 'negrita', variacion: true },
-      { texto: 'Coeficiente del lote común (cuota ÷ repartido)', valores: R.coefPct, formato: 'pct4' },
+      { texto: 'Total repartido entre los lotes (informado)', fuente: 'liquidación: prorrateo, total «Gastos Ord.»', valores: R.repartido, formato: 'money', variacion: true },
+      { texto: 'Repartido menos gastado', fuente: 'repartido − total de gastos', valores: R.repartidoMenosGasto, formato: 'money', celdas: R.repartidoMenosGasto.map((v) => (v !== null && Math.abs(v) >= 100000 ? 'mas' : undefined)) },
+      { texto: 'Cuota del lote común (informada)', fuente: 'liquidación: cupón del lote común', valores: R.cuota, formato: 'money', estilo: 'negrita', variacion: true },
+      { texto: 'Coeficiente del lote común (cuota ÷ repartido)', fuente: 'cuota ÷ repartido', valores: R.coefPct, formato: 'pct4' },
       ...(R.reducida.some((v) => v !== null)
         ? [
-            { texto: 'Cuota del lote de coeficiente reducido (implícita)', valores: R.reducida, formato: 'money' as const, variacion: true },
-            { texto: 'Lote reducido ÷ lote común', valores: R.relReducida, formato: 'num4' as const },
+            { texto: 'Cuota del lote de coeficiente reducido (implícita)', fuente: 'repartido − (lotes − 1) × cuota común', valores: R.reducida, formato: 'money' as const, variacion: true },
+            { texto: 'Lote reducido ÷ lote común', fuente: 'cuota reducida ÷ cuota común', valores: R.relReducida, formato: 'num4' as const },
           ]
         : []),
-      { texto: 'Cuota si se repartiera el gasto real (gasto × coeficiente)', valores: R.cuotaGastoReal, formato: 'money' },
-      { texto: 'Cargos particulares (solo algunos lotes)', valores: R.particulares, formato: 'money', estilo: 'rev', variacion: true },
-      { texto: 'Total de expensas emitidas (repartido + particulares)', valores: R.totalCalculado, formato: 'money', estilo: 'negrita' },
-      { texto: 'Total de expensas informado', valores: R.totalInformado, formato: 'money' },
-      { texto: 'Control: calculado menos informado', valores: R.controlTotal, formato: 'money', estilo: 'ok', celdas: R.controlTotal.map((v) => (v ? 'rev' : undefined)) },
-      { texto: 'Lo que cobra el administrador por mes (expensa ordinaria)', valores: R.cobradoOrdinario, formato: 'money', estilo: 'total', variacion: true },
+      { texto: 'Cuota si se repartiera el gasto real (gasto × coeficiente)', fuente: 'total de gastos × coeficiente', valores: R.cuotaGastoReal, formato: 'money' },
+      { texto: 'Cargos particulares (solo algunos lotes)', fuente: 'liquidación: prorrateo, columna «Part.»', valores: R.particulares, formato: 'money', estilo: 'rev', variacion: true },
+      { texto: 'Total de expensas emitidas (repartido + particulares)', fuente: 'repartido + particulares', valores: R.totalCalculado, formato: 'money', estilo: 'negrita' },
+      { texto: 'Total de expensas informado', fuente: 'liquidación: «Expensas y otros conceptos a cobrar»', valores: R.totalInformado, formato: 'money' },
+      { texto: 'Control: calculado menos informado', fuente: 'emitidas − informado (tiene que dar 0)', valores: R.controlTotal, formato: 'money', estilo: 'ok', celdas: R.controlTotal.map((v) => (v ? 'rev' : undefined)) },
+      { texto: 'Lo que cobra el administrador por mes (expensa ordinaria)', fuente: 'igual al repartido entre todos los lotes', valores: R.cobradoOrdinario, formato: 'money', estilo: 'total', variacion: true },
       sec('Expensa correcta (con el comprobante de cada gasto)'),
-      { texto: 'Gasto correcto del mes', valores: R.gastoCorrecto, formato: 'money', estilo: 'negrita' },
-      { texto: 'Cuota correcta del lote común', valores: R.cuotaCorrecta, formato: 'money', estilo: 'ok' },
-      { texto: 'Se cobró de más por lote común', valores: R.deMasLote, formato: 'money', estilo: 'mas' },
-      { texto: 'En %', valores: R.deMasPct, formato: 'pct' },
-      { texto: 'Se cobró de más a todo el barrio (repartido − gasto correcto)', valores: R.deMasBarrio, formato: 'money', estilo: 'mas' },
+      { texto: 'Gasto correcto del mes', fuente: 'suma de la liquidación correcta de cada rubro', valores: R.gastoCorrecto, formato: 'money', estilo: 'negrita' },
+      { texto: 'Cuota correcta del lote común', fuente: 'gasto correcto × coeficiente', valores: R.cuotaCorrecta, formato: 'money', estilo: 'ok' },
+      { texto: 'Se cobró de más por lote común', fuente: 'cuota informada − cuota correcta', valores: R.deMasLote, formato: 'money', estilo: 'mas' },
+      { texto: 'En %', fuente: 'de más ÷ cuota informada', valores: R.deMasPct, formato: 'pct' },
+      { texto: 'Se cobró de más a todo el barrio (repartido − gasto correcto)', fuente: 'repartido − gasto correcto', valores: R.deMasBarrio, formato: 'money', estilo: 'mas' },
     ],
     notas: R.notas,
   };
@@ -88,7 +96,7 @@ export function pestanaResumen(A: Analisis): Pestana {
     titulo: 'De cada $ 100 de gasto',
     columnas: cols,
     ancho: 60,
-    filas: R.peso.map((p) => ({ texto: p.nombre, valores: p.serie, formato: 'pct' })),
+    filas: R.peso.map((p) => ({ texto: p.nombre, fuente: 'rubro ÷ total de gastos', valores: p.serie, formato: 'pct' })),
   };
   return { id: 'resumen', titulo: 'Resumen', corto: 'Resumen', tablas: [t1, t2] };
 }
@@ -104,22 +112,23 @@ export function pestanaRubro(A: Analisis, k: number): Pestana {
     sec('Lo que liquidó la administración'),
     ...D.conceptos.map((f) => ({
       texto: f.etiqueta + (f.cantidad.some((n) => n > 1) ? ' (más de un ítem en el mes)' : ''),
+      fuente: `liquidación: rubro ${D.num}`,
       valores: f.serie,
       formato: 'money' as const,
       variacion: true,
       celdas: marca(f),
     })),
-    { texto: 'Total del rubro', valores: D.subtotal, formato: 'money', estilo: 'total', variacion: true },
-    { texto: '% del gasto total del mes', valores: D.pct, formato: 'pct' },
-    { texto: 'Lo que pagó cada lote común por este rubro', valores: D.porLote, formato: 'money' },
+    { texto: 'Total del rubro', fuente: 'suma de las filas de arriba', valores: D.subtotal, formato: 'money', estilo: 'total', variacion: true },
+    { texto: '% del gasto total del mes', fuente: 'total del rubro ÷ total de gastos del mes (Resumen)', valores: D.pct, formato: 'pct' },
+    { texto: 'Lo que pagó cada lote común por este rubro', fuente: 'total del rubro × coeficiente del lote común', valores: D.porLote, formato: 'money' },
   ];
   if (hayCorr) {
     filas.push(sec('Liquidación correcta (con el comprobante de cada gasto)'));
     for (const f of D.conceptos)
-      filas.push({ texto: f.etiqueta, valores: f.correcto, formato: 'money', celdas: f.correcto.map((v, i) => (v !== null && f.serie[i] !== null && v !== f.serie[i] ? 'ok' : undefined)), nota: [...new Set(f.criterios.flat())].join(', ') });
-    filas.push({ texto: 'Total correcto del rubro', valores: D.subtotalCorrecto, formato: 'money', estilo: 'total' });
-    filas.push({ texto: 'Diferencia: liquidado menos correcto', valores: D.diferencia, formato: 'money', estilo: 'mas' });
-    filas.push({ texto: 'Diferencia por lote común', valores: D.diferenciaLote, formato: 'money' });
+      filas.push({ texto: f.etiqueta, fuente: 'liquidación correcta (si no hay corrección, lo liquidado)', valores: f.correcto, formato: 'money', celdas: f.correcto.map((v, i) => (v !== null && f.serie[i] !== null && v !== f.serie[i] ? 'ok' : undefined)), nota: [...new Set(f.criterios.flat())].join(', ') });
+    filas.push({ texto: 'Total correcto del rubro', fuente: 'suma de las filas de la liquidación correcta', valores: D.subtotalCorrecto, formato: 'money', estilo: 'total' });
+    filas.push({ texto: 'Diferencia: liquidado menos correcto', fuente: 'total del rubro − total correcto', valores: D.diferencia, formato: 'money', estilo: 'mas' });
+    filas.push({ texto: 'Diferencia por lote común', fuente: 'diferencia × coeficiente del lote común', valores: D.diferenciaLote, formato: 'money' });
   }
   const tablas: TablaT[] = [
     { id: `rubro${D.num}`, titulo: `Rubro ${D.num} · ${D.nombre}`, bajada: `${A.nombre}. Amarillo: importe estimado o provisorio. Verde: importe corregido.`, columnas: cols, conVariacion: true, ancho: 58, filas, notas: D.notas },
@@ -148,41 +157,40 @@ export function pestanaFlujo(A: Analisis): Pestana {
   const cols = V(A);
   const filas: FilaT[] = [
     sec('Movimientos de la cuenta según la liquidación'),
-    { texto: 'Saldo al empezar el mes', valores: F.saldoInicial, formato: 'money', estilo: 'negrita' },
-    ...F.cobros.map((x) => ({ texto: x.texto, valores: x.serie, formato: 'money' as const, variacion: true, estilo: x.clave === 'NO_IDENTIFICADOS' ? ('rev' as const) : undefined })),
-    { texto: 'Total cobrado', valores: F.totalCobrado, formato: 'money', estilo: 'total' },
-    ...F.pagos.map((x) => ({ texto: x.texto, valores: x.serie, formato: 'money' as const, estilo: x.clave === 'SIN_DETALLE' || x.clave === 'AJUSTE' ? ('mas' as const) : x.clave === 'RECLASIFICACION' ? ('gris' as const) : undefined })),
-    { texto: 'Total salido', valores: F.totalSalido, formato: 'money', estilo: 'total' },
-    { texto: 'Saldo al cierre (calculado)', valores: F.saldoCalculado, formato: 'money', estilo: 'negrita' },
-    { texto: 'Saldo al cierre informado', valores: F.saldoInformado, formato: 'money' },
-    { texto: 'Control', valores: F.control, formato: 'money', estilo: 'ok', celdas: F.control.map((v) => (v ? 'mas' : undefined)) },
-    { texto: 'Pagado sin gasto liquidado ÷ gasto del mes', valores: F.sinDetalleTotal.map((v, i) => (v && F.gasto[i] ? -v / F.gasto[i] : null)), formato: 'pct' },
+    { texto: 'Saldo al empezar el mes', fuente: 'liquidación: «Saldo anterior»', valores: F.saldoInicial, formato: 'money', estilo: 'negrita' },
+    ...F.cobros.map((x) => ({ texto: x.texto, fuente: 'liquidación: detalle de egresos e ingresos', valores: x.serie, formato: 'money' as const, variacion: true, estilo: x.clave === 'NO_IDENTIFICADOS' ? ('rev' as const) : undefined })),
+    { texto: 'Total cobrado', fuente: 'suma de los cobros de arriba', valores: F.totalCobrado, formato: 'money', estilo: 'total' },
+    ...F.pagos.map((x) => ({ texto: x.texto, fuente: 'liquidación: detalle de egresos e ingresos', valores: x.serie, formato: 'money' as const, estilo: x.clave === 'SIN_DETALLE' || x.clave === 'AJUSTE' ? ('mas' as const) : x.clave === 'RECLASIFICACION' ? ('gris' as const) : undefined })),
+    { texto: 'Total salido', fuente: 'suma de los pagos de arriba', valores: F.totalSalido, formato: 'money', estilo: 'total' },
+    { texto: 'Saldo al cierre (calculado)', fuente: 'saldo al empezar + total cobrado + total salido', valores: F.saldoCalculado, formato: 'money', estilo: 'negrita' },
+    { texto: 'Saldo al cierre informado', fuente: 'liquidación: «Saldo al cierre»', valores: F.saldoInformado, formato: 'money' },
+    { texto: 'Control', fuente: 'calculado − informado (tiene que dar 0)', valores: F.control, formato: 'money', estilo: 'ok', celdas: F.control.map((v) => (v ? 'mas' : undefined)) },
+    { texto: 'Pagado sin gasto liquidado ÷ gasto del mes', fuente: 'pagos sin gasto liquidado ÷ total de gastos', valores: F.sinDetalleTotal.map((v, i) => (v && F.gasto[i] ? -v / F.gasto[i] : null)), formato: 'pct' },
     sec('Lo gastado contra lo pagado'),
-    { texto: 'Gastos liquidados del mes', valores: F.gasto, formato: 'money' },
-    { texto: 'Pagado en el mismo mes', valores: F.pagadoMes, formato: 'money' },
-    { texto: '% pagado en el mes', valores: F.pctPagado, formato: 'pct' },
-    { texto: 'Gastos del mes que quedan sin pagar (informado)', valores: F.pendMes, formato: 'money' },
-    { texto: 'Total de saldos pendientes de pago (informado)', valores: F.pendTotal, formato: 'money' },
-    { texto: 'Total pendiente menos lo pendiente solo del mes (no puede ser negativo)', valores: F.pendDif, formato: 'money', celdas: F.pendDif.map((v) => (v !== null && v < 0 ? 'mas' : undefined)) },
-    { texto: 'Pagos de gastos de meses anteriores (informado)', valores: F.pagosAnteriores, formato: 'money', estilo: 'gris' },
+    { texto: 'Gastos liquidados del mes', fuente: 'Resumen: total de gastos', valores: F.gasto, formato: 'money' },
+    { texto: 'Pagado en el mismo mes', fuente: 'fila «Pagos de gastos liquidados»', valores: F.pagadoMes, formato: 'money' },
+    { texto: '% pagado en el mes', fuente: 'pagado ÷ gastos liquidados', valores: F.pctPagado, formato: 'pct' },
+    { texto: 'Gastos del mes que quedan sin pagar (informado)', fuente: 'liquidación: estado patrimonial, «Gastos devengados pendientes»', valores: F.pendMes, formato: 'money' },
+    { texto: 'Pagos de gastos de meses anteriores (informado)', fuente: 'liquidación: «Gastos pagados de períodos anteriores»', valores: F.pagosAnteriores, formato: 'money', estilo: 'gris' },
     sec('Deuda de los propietarios'),
-    { texto: 'Expensas adeudadas a cobrar', valores: F.deudas, formato: 'money', variacion: true },
-    { texto: 'Intereses a cobrar', valores: F.intereses, formato: 'money' },
-    { texto: 'Lotes con deuda', valores: F.lotesConDeuda, formato: 'num' },
-    { texto: 'Cobros sin identificar que figuran en la liquidación', valores: F.noIdentificados, formato: 'money', estilo: 'rev' },
-    { texto: 'Repartido de más acumulado (repartido − gastado, desde el primer mes)', valores: F.repartidoDeMasAcum, formato: 'money', celdas: F.repartidoDeMasAcum.map((v) => (v > 100000 ? 'mas' : undefined)) },
+    { texto: 'Expensas adeudadas a cobrar', fuente: 'liquidación: estado patrimonial, «Deudas a cobrar»', valores: F.deudas, formato: 'money', variacion: true },
+    { texto: 'Intereses a cobrar', fuente: 'liquidación: estado patrimonial', valores: F.intereses, formato: 'money' },
+    { texto: 'Lotes con deuda', fuente: 'prorrateo: lotes con deuda (sin nombres)', valores: F.lotesConDeuda, formato: 'num' },
+    { texto: 'Saldos pendientes de pago de los propietarios (informado)', fuente: 'liquidación: «Saldos pendientes de pago» (lotes que deben, sin nombres)', valores: F.pendTotal, formato: 'money' },
+    { texto: 'Cobros sin identificar que figuran en la liquidación', fuente: 'liquidación: «Cobros no identificados»', valores: F.noIdentificados, formato: 'money', estilo: 'rev' },
+    { texto: 'Repartido de más acumulado (repartido − gastado, desde el primer mes)', fuente: 'suma, desde el primer mes, de repartido − gastado', valores: F.repartidoDeMasAcum, formato: 'money', celdas: F.repartidoDeMasAcum.map((v) => (v > 100000 ? 'mas' : undefined)) },
     sec('Fondos y patrimonio (informado)'),
-    { texto: 'Fondo ordinario al cierre', valores: F.fondoOrd, formato: 'money', celdas: F.fondoOrd.map((v) => (v !== null && v < 0 ? 'mas' : undefined)) },
-    { texto: 'Fondo extraordinario al cierre', valores: F.fondoExt, formato: 'money' },
-    { texto: 'Patrimonio neto informado', valores: F.patrimonio, formato: 'money' },
-    { texto: 'El documento no cierra en', valores: F.controlesFallidos.map((x) => x.split('|').filter(Boolean).join(' · ') || null), formato: 'text', estilo: 'rev' },
+    { texto: 'Fondo ordinario al cierre', fuente: 'liquidación: saldo al cierre, columna ordinario', valores: F.fondoOrd, formato: 'money', celdas: F.fondoOrd.map((v) => (v !== null && v < 0 ? 'mas' : undefined)) },
+    { texto: 'Fondo extraordinario al cierre', fuente: 'liquidación: saldo al cierre, columna extraordinario', valores: F.fondoExt, formato: 'money' },
+    { texto: 'Patrimonio neto informado', fuente: 'liquidación: «Patrimonio neto al cierre»', valores: F.patrimonio, formato: 'money' },
+    { texto: 'El documento no cierra en', fuente: 'controles automáticos al cargar el PDF', valores: F.controlesFallidos.map((x) => x.split('|').filter(Boolean).join(' · ') || null), formato: 'text', estilo: 'rev' },
   ];
   if (F.saldosBanco.length) {
     filas.push(sec('Saldo de la liquidación contra el saldo del banco al cierre'));
-    filas.push({ texto: 'Saldo según la liquidación', valores: F.saldoInformado, formato: 'money' });
-    for (const b of F.saldosBanco) filas.push({ texto: `Banco ${b.banco} (último saldo del extracto)`, valores: b.serie.map((x) => (x ? x.saldo : 'N/D')), formato: 'money' });
-    filas.push({ texto: 'Total en los bancos', valores: F.totalBancos.map((v) => v ?? 'N/D'), formato: 'money', estilo: 'negrita' });
-    filas.push({ texto: 'Banco menos liquidación (a explicar)', valores: F.difBanco, formato: 'money', estilo: 'rev' });
+    filas.push({ texto: 'Saldo según la liquidación', fuente: 'liquidación: «Saldo al cierre»', valores: F.saldoInformado, formato: 'money' });
+    for (const b of F.saldosBanco) filas.push({ texto: `Banco ${b.banco}`, fuente: 'último saldo del extracto del mes', valores: b.serie.map((x) => (x ? x.saldo : 'N/D')), formato: 'money' });
+    filas.push({ texto: 'Total en los bancos', fuente: 'suma de los bancos de arriba', valores: F.totalBancos.map((v) => v ?? 'N/D'), formato: 'money', estilo: 'negrita' });
+    filas.push({ texto: 'Banco menos liquidación (a explicar)', fuente: 'total en los bancos − saldo según la liquidación', valores: F.difBanco, formato: 'money', estilo: 'rev' });
   }
   const tablas: TablaT[] = [{ id: 'flujo', titulo: 'Flujo de fondos · la plata, no lo liquidado', bajada: `${A.nombre}. Lo que entró y salió de la cuenta según cada liquidación, contra los extractos cargados.`, columnas: cols, conVariacion: true, ancho: 62, filas, notas: F.notas }];
   if (F.sinDetalle.length)
@@ -204,19 +212,19 @@ export function pestanaAcumulado(A: Analisis): Pestana {
   const cols = V(A);
   const filas: FilaT[] = [
     sec('Gasto y cuota: liquidado contra correcto'),
-    { texto: 'Gasto liquidado', valores: X.gastoLiquidado, formato: 'money' },
-    { texto: 'Gasto correcto (igual al liquidado en los meses sin liquidación correcta)', valores: X.gastoCorrecto, formato: 'money', estilo: 'negrita', celdas: X.corregido.map((v) => (v ? undefined : 'gris')) },
-    { texto: 'Cuota liquidada del lote común', valores: X.cuotaLiquidada, formato: 'money' },
-    { texto: 'Cuota correcta del lote común', valores: X.cuotaCorrecta, formato: 'money', estilo: 'ok' },
-    { texto: 'Pagado de más por el lote común', valores: X.deMasLote, formato: 'money', estilo: 'mas' },
-    { texto: 'Acumulado del lote común', valores: X.acumLote, formato: 'money', estilo: 'negrita' },
-    { texto: 'En % de la cuota liquidada', valores: X.pct, formato: 'pct' },
-    ...(X.deMasReducido ? [{ texto: `Pagado de más por el lote reducido (${Math.round((X.coefReducido ?? 0) * 100)}%)`, valores: X.deMasReducido, formato: 'money' as const }] : []),
-    { texto: 'Pagado de más por todo el barrio (repartido − gasto correcto)', valores: X.deMasBarrio, formato: 'money', estilo: 'mas' },
-    { texto: 'Acumulado del barrio', valores: X.acumBarrio, formato: 'money', estilo: 'negrita' },
+    { texto: 'Gasto liquidado', fuente: 'Resumen: total de gastos', valores: X.gastoLiquidado, formato: 'money' },
+    { texto: 'Gasto correcto (igual al liquidado en los meses sin liquidación correcta)', fuente: 'Resumen: gasto correcto', valores: X.gastoCorrecto, formato: 'money', estilo: 'negrita', celdas: X.corregido.map((v) => (v ? undefined : 'gris')) },
+    { texto: 'Cuota liquidada del lote común', fuente: 'Resumen: cuota informada', valores: X.cuotaLiquidada, formato: 'money' },
+    { texto: 'Cuota correcta del lote común', fuente: 'gasto correcto × coeficiente', valores: X.cuotaCorrecta, formato: 'money', estilo: 'ok' },
+    { texto: 'Pagado de más por el lote común', fuente: 'cuota liquidada − cuota correcta', valores: X.deMasLote, formato: 'money', estilo: 'mas' },
+    { texto: 'Acumulado del lote común', fuente: 'suma, desde el primer mes, de la fila anterior', valores: X.acumLote, formato: 'money', estilo: 'negrita' },
+    { texto: 'En % de la cuota liquidada', fuente: 'pagado de más ÷ cuota liquidada', valores: X.pct, formato: 'pct' },
+    ...(X.deMasReducido ? [{ texto: `Pagado de más por el lote reducido (${Math.round((X.coefReducido ?? 0) * 100)}%)`, fuente: `pagado de más del lote común × ${String(X.coefReducido ?? '').replace('.', ',')}`, valores: X.deMasReducido, formato: 'money' as const }] : []),
+    { texto: 'Pagado de más por todo el barrio (repartido − gasto correcto)', fuente: 'repartido − gasto correcto', valores: X.deMasBarrio, formato: 'money', estilo: 'mas' },
+    { texto: 'Acumulado del barrio', fuente: 'suma, desde el primer mes, de la fila anterior', valores: X.acumBarrio, formato: 'money', estilo: 'negrita' },
     sec('De dónde sale la diferencia (todo el barrio)'),
-    ...X.porRubro.map((r) => ({ texto: r.nombre, valores: r.serie, formato: 'money' as const })),
-    { texto: 'Repartido menos gastado (previsión y redondeo)', valores: X.repartidoMenosGasto, formato: 'money' },
+    ...X.porRubro.map((r) => ({ texto: r.nombre, fuente: 'liquidado − correcto del rubro (su pestaña)', valores: r.serie, formato: 'money' as const })),
+    { texto: 'Repartido menos gastado (previsión y redondeo)', fuente: 'Resumen: repartido − total de gastos', valores: X.repartidoMenosGasto, formato: 'money' },
   ];
   const P = X.proyeccion;
   const t: TablaT[] = [{ id: 'acumulado', titulo: 'Lo pagado de más, acumulado y proyectado', bajada: `${A.nombre}. Por lote común, por lote reducido y para todo el barrio.`, columnas: cols, ancho: 64, filas, notas: X.notas }];
@@ -228,13 +236,13 @@ export function pestanaAcumulado(A: Analisis): Pestana {
       formatos: ['money'],
       ancho: 64,
       filas: [
-        { texto: 'Cuota liquidada × 12', valores: [P.cuotaLiquidada12] },
-        { texto: 'Cuota correcta × 12', valores: [P.cuotaCorrecta12] },
-        { texto: 'Pagado de más en un año por el lote común (todo el mes)', valores: [P.deMas12], estilo: 'mas' },
-        { texto: 'Gastos que no se repiten (obras y equipos), que se excluyen', valores: [P.unaVez], estilo: 'gris' },
-        { texto: 'Pagado de más en un año por el lote común (solo lo que se repite)', valores: [P.recurrenteLote12], estilo: 'mas' },
-        { texto: 'Lo mismo, para todo el barrio', valores: [P.recurrenteBarrio12], estilo: 'negrita' },
-        { texto: 'Ya pagado de más + 12 meses más, lote común', valores: [P.totalLote], estilo: 'total' },
+        { texto: 'Cuota liquidada × 12', fuente: 'cuota liquidada del último mes × 12', valores: [P.cuotaLiquidada12] },
+        { texto: 'Cuota correcta × 12', fuente: 'cuota correcta del último mes × 12', valores: [P.cuotaCorrecta12] },
+        { texto: 'Pagado de más en un año por el lote común (todo el mes)', fuente: 'diferencia de las dos filas de arriba', valores: [P.deMas12], estilo: 'mas' },
+        { texto: 'Gastos que no se repiten (obras y equipos), que se excluyen', fuente: 'obras y equipos corregidos en el último mes', valores: [P.unaVez], estilo: 'gris' },
+        { texto: 'Pagado de más en un año por el lote común (solo lo que se repite)', fuente: '(de más del barrio − previsión − obras) × coeficiente × 12', valores: [P.recurrenteLote12], estilo: 'mas' },
+        { texto: 'Lo mismo, para todo el barrio', fuente: '(de más del barrio − previsión − obras) × 12', valores: [P.recurrenteBarrio12], estilo: 'negrita' },
+        { texto: 'Ya pagado de más + 12 meses más, lote común', fuente: 'acumulado del lote común + fila «solo lo que se repite»', valores: [P.totalLote], estilo: 'total' },
       ],
     });
   return { id: 'acumulado', titulo: 'Acumulado y proyección', corto: 'Acumulado', tablas: t };
@@ -253,10 +261,10 @@ export function pestanaRespaldo(A: Analisis): Pestana {
     columnas: cols,
     ancho: 40,
     filas: [
-      ...R.resumenTipos.map((x) => ({ texto: x.nombre, valores: x.serie, formato: 'money' as const, celdas: x.serie.map(() => est[x.tipo]) })),
-      { texto: 'Total', valores: R.total, formato: 'money', estilo: 'total' },
-      { texto: 'Sin respaldo válido (tipos 3, 4 y 5)', valores: R.sinValido, formato: 'money', estilo: 'mas' },
-      { texto: 'En % del gasto', valores: R.pctSinValido, formato: 'pct', estilo: 'negrita' },
+      ...R.resumenTipos.map((x) => ({ texto: x.nombre, fuente: 'suma de los gastos de ese tipo (tabla de abajo)', valores: x.serie, formato: 'money' as const, celdas: x.serie.map(() => est[x.tipo]) })),
+      { texto: 'Total', fuente: 'suma de los cinco tipos', valores: R.total, formato: 'money', estilo: 'total' },
+      { texto: 'Sin respaldo válido (tipos 3, 4 y 5)', fuente: 'tipos 3 + 4 + 5', valores: R.sinValido, formato: 'money', estilo: 'mas' },
+      { texto: 'En % del gasto', fuente: 'sin respaldo válido ÷ total', valores: R.pctSinValido, formato: 'pct', estilo: 'negrita' },
     ],
     notas: [...Object.entries(TIPOS_RESPALDO).map(([k, v]) => ({ num: Number(k) + 100, texto: `${v.nombre}: ${v.texto}` })), ...R.notas].map((n, i) => ({ num: i + 1, texto: n.texto })),
   };
@@ -266,6 +274,7 @@ export function pestanaRespaldo(A: Analisis): Pestana {
     columnas: ['Mes', 'Importe', 'Respaldo', 'Comprobantes', 'Detalle'],
     formatos: ['text', 'money', 'text', 'num', 'text'],
     ancho: 40,
+    anchos: [undefined, undefined, 9, undefined, 30],
     filas: [...R.filas].reverse().map((f) => ({ texto: f.concepto, valores: [mesCorto(f.mes), f.importe, TIPOS_RESPALDO[f.tipo]?.nombre ?? '', f.comprobantes, f.detalle], celdas: [undefined, undefined, est[f.tipo], undefined, undefined] })),
   };
   return { id: 'respaldo', titulo: 'Respaldo documental', corto: 'Respaldo', tablas: [t1, t2] };
@@ -286,8 +295,9 @@ export function pestanaMatriz(A: Analisis): Pestana {
         titulo: 'Cuántas observaciones hay en cada prioridad',
         columnas: ['Cantidad', 'Monto anual equivalente'],
         formatos: ['num', 'money'],
-        ancho: 20,
-        filas: M.porPrioridad.map((p) => ({ texto: p.prioridad, valores: [p.cantidad, p.anual], celdas: [est[p.prioridad], undefined] })),
+        ancho: 14,
+        compacta: true,
+        filas: M.porPrioridad.map((p) => ({ texto: p.prioridad, fuente: 'filas de la tabla de abajo con esa prioridad', valores: [p.cantidad, p.anual], celdas: [est[p.prioridad], undefined] })),
       },
       {
         id: 'matriz-tabla',
@@ -295,7 +305,9 @@ export function pestanaMatriz(A: Analisis): Pestana {
         columnas: ['Problema', 'Monto en juego', 'Cómo se mide', 'Equivalente anual', 'Por lote común (año)', 'Gravedad', 'Probabilidad', 'Por qué', 'Impacto', 'Puntaje', 'Prioridad', 'Estado del reclamo', 'Qué pedir', 'Dónde verlo'],
         formatos: ['text', 'money', 'text', 'money', 'money', 'text', 'text', 'text', 'text', 'num', 'text', 'text', 'text', 'text'],
         ancho: 8,
+        anchos: [20, undefined, 7, undefined, undefined, 7, 6, 16, 5, undefined, 7, 10, 22, 8],
         filas: M.filas.map((f) => ({
+          id: f.codigo,
           texto: f.codigo,
           valores: [f.titulo, f.monto ?? 'N/D', f.base, f.anual, f.porLote, f.gravedad, f.probabilidad, f.porQue, f.impacto, f.puntaje, f.prioridad, f.estado, f.quePedir, f.donde],
           celdas: [undefined, undefined, undefined, undefined, undefined, f.gravedad === 'CRÍTICO' ? 'mas' : undefined, undefined, undefined, undefined, undefined, est[f.prioridad], /PENDIENTE|SIN RESP|NUEVO/.test(f.estado) ? 'mas' : undefined, undefined, undefined],
@@ -316,8 +328,8 @@ export function pestanaAhorros(A: Analisis): Pestana {
     const s = g === 'A' ? X.A : g === 'B' ? X.B : X.C;
     return [
       sec(t),
-      ...fs.map((f) => ({ texto: f.medida, valores: [f.hoy, f.propuesta, f.mensual ?? 'N/D', f.lote, f.anualLote, f.base, f.ref], celdas: [undefined, undefined, f.supuesto ? ('rev' as const) : undefined, undefined, undefined, undefined, undefined] })),
-      { texto: `Subtotal${g === 'C' ? ' (una sola vez, no anual)' : ''}`, valores: ['', '', s.mensual, s.lote, s.anualLote, '', ''], estilo: 'total' as const },
+      ...fs.map((f) => ({ texto: f.medida, fuente: f.origen, valores: [f.hoy, f.propuesta, f.mensual ?? 'N/D', f.lote, f.anualLote, f.base, f.ref], celdas: [undefined, undefined, f.supuesto ? ('rev' as const) : undefined, undefined, undefined, undefined, undefined] })),
+      { texto: `Subtotal${g === 'C' ? ' (una sola vez, no anual)' : ''}`, fuente: 'suma del grupo', valores: ['', '', s.mensual, s.lote, s.anualLote, '', ''], estilo: 'total' as const },
     ];
   };
   return {
@@ -332,13 +344,14 @@ export function pestanaAhorros(A: Analisis): Pestana {
         columnas: ['Hoy', 'Propuesta', 'Ahorro por mes · barrio', 'Por lote común', 'Por año · lote común', 'Base del cálculo', 'Ref.'],
         formatos: ['text', 'text', 'money', 'money', 'money', 'text', 'text'],
         ancho: 46,
+        anchos: [14, 16, undefined, undefined, undefined, 10, 6],
         filas: [
           ...grupo('A', 'A. Corregir lo que está mal liquidado'),
           ...grupo('B', 'B. Gestionar mejor'),
           ...grupo('C', 'C. Una sola vez'),
-          { texto: 'Ahorro mensual recurrente (A + B)', valores: ['', '', X.recurrente.mensual, X.recurrente.lote, X.recurrente.anualLote, '', ''], estilo: 'ok' },
-          { texto: `Cuota del lote común con todas las medidas (${mesCorto(X.mesCuota)})`, valores: ['', '', null, X.cuotaConMedidas, null, `Hoy ${(X.cuota / 100).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`, ''], estilo: 'negrita' },
-          { texto: 'Baja de la cuota', valores: ['', '', null, X.baja === null ? null : `${(X.baja * 100).toFixed(1).replace('.', ',')}%`, null, '', ''] },
+          { texto: 'Ahorro mensual recurrente (A + B)', fuente: 'subtotal A + subtotal B', valores: ['', '', X.recurrente.mensual, X.recurrente.lote, X.recurrente.anualLote, '', ''], estilo: 'ok' },
+          { texto: `Cuota del lote común con todas las medidas (${mesCorto(X.mesCuota)})`, fuente: 'cuota de hoy − ahorro recurrente por lote', valores: ['', '', null, X.cuotaConMedidas, null, `Hoy ${(X.cuota / 100).toLocaleString('es-AR', { minimumFractionDigits: 2 })}`, ''], estilo: 'negrita' },
+          { texto: 'Baja de la cuota', fuente: 'ahorro por lote ÷ cuota de hoy', valores: ['', '', null, X.baja === null ? null : `${(X.baja * 100).toFixed(1).replace('.', ',')}%`, null, '', ''] },
         ],
         notas: X.notas,
       },
@@ -361,6 +374,7 @@ export function pestanaPedido(A: Analisis): Pestana {
         columnas: ['Tema', 'Qué pedir', 'Importe en juego', 'Gravedad', 'Estado del reclamo', 'Lo que muestran los documentos', 'Dónde verlo'],
         formatos: ['text', 'text', 'money', 'text', 'text', 'text', 'text'],
         ancho: 8,
+        anchos: [18, 24, undefined, 7, 10, 24, 8],
         filas: A.pedido.filas.map((f) => ({
           texto: f.codigo,
           valores: [f.tema, f.pedir, f.importe ?? 'N/D', f.gravedad, f.estado, f.muestran, f.donde],
@@ -386,6 +400,7 @@ export function pestanaCronologia(A: Analisis): Pestana {
         columnas: ['Tipo', 'Hecho', 'Importe', 'Ref.'],
         formatos: ['text', 'text', 'money', 'text'],
         ancho: 12,
+        anchos: [8, 40, undefined, 8],
         filas: A.cronologia.map((e) => ({ texto: dd(e.fecha), valores: [e.tipo + (e.origen === 'auto' ? ' (auto)' : ''), e.hecho, e.importe, e.ref], celdas: [e.tipo === 'Banco' ? 'rev' : e.tipo === 'Respuesta' ? 'ok' : undefined, undefined, undefined, undefined] })),
       },
     ],
@@ -399,20 +414,21 @@ export function pestanaConsolidado(base: Parameters<typeof consolidado>[0]): Pes
     sec('Gastos por concepto'),
     ...C.filas.map((f) => ({
       texto: f.etiqueta,
+      fuente: 'liquidación de cada barrio',
       valores: f.serie,
       formato: 'money' as const,
       celdas: C.cols.map((x) => (f.iguales.includes(x.mes) ? ('mas' as const) : undefined)),
       nota: f.iguales.length ? 'mismo importe' : undefined,
     })),
-    { texto: 'Total de gastos (suma)', valores: C.gastoSuma, formato: 'money', estilo: 'total' },
-    { texto: 'Total de gastos informado', valores: C.gastoInformado, formato: 'money' },
-    { texto: 'Total repartido entre los lotes', valores: C.repartido, formato: 'money' },
-    { texto: 'Cantidad de lotes', valores: C.lotes, formato: 'num' },
-    { texto: 'Gasto por lote', valores: C.gastoPorLote, formato: 'money', estilo: 'negrita' },
-    { texto: 'Cuota del lote común (informada)', valores: C.cuota, formato: 'money' },
-    { texto: 'Cargos particulares', valores: C.particulares, formato: 'money', estilo: 'rev' },
-    { texto: 'Total de expensas emitidas', valores: C.totalExpensas, formato: 'money', estilo: 'negrita' },
-    { texto: 'Lotes con deuda', valores: C.lotesConDeuda, formato: 'num' },
+    { texto: 'Total de gastos (suma)', fuente: 'suma de los conceptos de arriba', valores: C.gastoSuma, formato: 'money', estilo: 'total' },
+    { texto: 'Total de gastos informado', fuente: 'liquidación de cada barrio', valores: C.gastoInformado, formato: 'money' },
+    { texto: 'Total repartido entre los lotes', fuente: 'liquidación de cada barrio: prorrateo', valores: C.repartido, formato: 'money' },
+    { texto: 'Cantidad de lotes', fuente: 'prorrateo de cada barrio', valores: C.lotes, formato: 'num' },
+    { texto: 'Gasto por lote', fuente: 'total de gastos ÷ cantidad de lotes', valores: C.gastoPorLote, formato: 'money', estilo: 'negrita' },
+    { texto: 'Cuota del lote común (informada)', fuente: 'liquidación: cupón del lote común', valores: C.cuota, formato: 'money' },
+    { texto: 'Cargos particulares', fuente: 'liquidación de cada barrio', valores: C.particulares, formato: 'money', estilo: 'rev' },
+    { texto: 'Total de expensas emitidas', fuente: 'liquidación de cada barrio', valores: C.totalExpensas, formato: 'money', estilo: 'negrita' },
+    { texto: 'Lotes con deuda', fuente: 'prorrateo: lotes con deuda (sin nombres)', valores: C.lotesConDeuda, formato: 'num' },
   ];
   return {
     id: 'consolidado',

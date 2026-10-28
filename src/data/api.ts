@@ -21,20 +21,35 @@ async function conTimeout<T>(p: Promise<T>, ms: number): Promise<T> {
   return Promise.race([p, new Promise<T>((_, rej) => setTimeout(() => rej(new Error('Tiempo de espera agotado')), ms))]);
 }
 
+/** La copia incluida en la app: se muestra al instante mientras se lee la planilla. */
+export function copiaIncluida(detalle?: string): Carga {
+  return { base: limpiarBase(normalizar(copia.sheets as never)), origen: 'copia', detalle: detalle ?? `Copia incluida en la app (${copia.updated}).` };
+}
+
+async function leerPlanilla(ms: number): Promise<Base> {
+  const r = await conTimeout(fetch(`${API}?accion=datos&t=${Date.now()}`, { cache: 'no-store' }), ms);
+  const j = await r.json();
+  if (!j.ok) throw new Error(j.error ?? 'Error de la planilla');
+  return normalizar(j.sheets);
+}
+
+/**
+ * Lee la planilla. Google tarda a veces más de 30 segundos en "despertar" el script la primera vez:
+ * se espera hasta 60 segundos y, si falla, se reintenta una vez.
+ */
 export async function cargarBase(): Promise<Carga> {
-  if (API) {
+  if (!API) return copiaIncluida(`Copia incluida en la app (${copia.updated}). Falta configurar la planilla.`);
+  let error = '';
+  for (const ms of [60000, 60000]) {
     try {
-      const r = await conTimeout(fetch(`${API}?accion=datos`), 15000);
-      const j = await r.json();
-      if (!j.ok) throw new Error(j.error ?? 'Error de la planilla');
-      const base = normalizar(j.sheets);
-      if (base.PERIODOS.length) return { base: limpiarBase(base), origen: 'api', detalle: `Planilla actualizada ${j.updated}` };
-      return { base: limpiarBase(normalizar(copia.sheets as never)), origen: 'copia', detalle: 'La planilla no tiene liquidaciones: se muestra la copia incluida. Revisá que hayas subido la planilla inicial.' };
+      const base = await leerPlanilla(ms);
+      if (base.PERIODOS.length) return { base: limpiarBase(base), origen: 'api', detalle: `Planilla en vivo (${new Date().toLocaleTimeString('es-AR', { hour: '2-digit', minute: '2-digit' })})` };
+      return copiaIncluida('La planilla no tiene liquidaciones: se muestra la copia incluida. Revisá que hayas subido la planilla inicial.');
     } catch (e) {
-      return { base: limpiarBase(normalizar(copia.sheets as never)), origen: 'copia', detalle: `La planilla no respondió (${(e as Error).message}). Se muestra la copia del ${copia.updated}.` };
+      error = (e as Error).message;
     }
   }
-  return { base: limpiarBase(normalizar(copia.sheets as never)), origen: 'copia', detalle: `Copia incluida en la app (${copia.updated}). Falta configurar la planilla.` };
+  return copiaIncluida(`La planilla no respondió (${error}). Se muestra la copia del ${copia.updated}. Tocá «Reintentar».`);
 }
 
 export async function enviar<T = Record<string, unknown>>(cuerpo: Record<string, unknown>): Promise<T & { ok: boolean; error?: string }> {

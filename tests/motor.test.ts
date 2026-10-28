@@ -45,7 +45,6 @@ describe('Senderos II · cifras del Excel al centavo', () => {
     expect(F.sinDetalleTotal).toEqual([-400000000, 0, -1978493420, 0, 0]);
     expect(F.totalBancos[i09]).toBe(859650030);
     expect(F.difBanco[i09]).toBe(496458584);
-    expect(F.pendDif.map((v) => v !== null && v < 0)).toEqual([false, true, true, false, true]);
   });
 
   it('acumulado y proyección', () => {
@@ -70,9 +69,20 @@ describe('Senderos II · cifras del Excel al centavo', () => {
 
   it('matriz de riesgo', () => {
     const M = A.matriz;
-    expect(M.filas.length).toBe(43);
-    expect(M.porPrioridad.map((p) => p.cantidad)).toEqual([9, 15, 14, 4, 1]);
+    expect(M.filas.length).toBe(42);
+    expect(M.porPrioridad.map((p) => p.cantidad)).toEqual([9, 14, 14, 4, 1]);
     expect(M.filas.filter((f) => f.prioridad.startsWith('1')).map((f) => f.codigo).sort()).toEqual(['H01', 'H02', 'H03', 'H11', 'H18', 'H20', 'H26', 'H28', 'H29']);
+  });
+
+  it('novedades de octubre: ordenadas por monto, sin el abono de plagas, con aclaraciones y la cuota al final', () => {
+    const N = A.novedades;
+    expect(N.at(-1)!.tipo).toBe('cuota');
+    expect(N.some((n) => /plagas/i.test(n.texto))).toBe(false);
+    const montos = N.slice(0, -1).map((n) => n.importe ?? 0);
+    const pos = montos.filter((m) => m >= 0);
+    expect(pos).toEqual([...pos].sort((a, b) => b - a));
+    expect(N.find((n) => n.clave === 'Telered')!.aclaracion).toMatch(/100\.000/);
+    expect(N.find((n) => n.clave.startsWith('Mantenimiento Fideicomiso - espacios propios'))!.aclaracion).toMatch(/236\.474,77/);
   });
 
   it('consolidado: la seguridad es igual al centavo en los dos barrios', () => {

@@ -1,7 +1,7 @@
 // Estado de la app: datos, barrio elegido, clave y pestaña. Un store mínimo, sin librerías.
 import { useSyncExternalStore } from 'react';
 import type { Base } from './data/esquema';
-import { cargarBase, enviar } from './data/api';
+import { cargarBase, copiaIncluida, enviar } from './data/api';
 
 export type Tema = 'claro' | 'oscuro' | 'sistema';
 interface Estado {
@@ -46,7 +46,7 @@ let estado: Estado = {
   barrio: leer('barrio', 'S2'),
   clave: leerSesion('clave'),
   rol: leerSesion('rol'),
-  tab: new URLSearchParams(location.hash.slice(1)).get('t') ?? 'resumen',
+  tab: new URLSearchParams(location.hash.slice(1)).get('t') ?? 'expensa',
   tema: leer('tema', 'sistema') as Tema,
 };
 const subs = new Set<() => void>();
@@ -57,6 +57,11 @@ function set(p: Partial<Estado>) {
 
 const acciones = {
   async recargar() {
+    // mientras tanto se ve la copia (si todavía no hay nada en pantalla)
+    if (!estado.base) {
+      const c0 = copiaIncluida('Leyendo la planilla… (la primera vez puede tardar hasta un minuto)');
+      set({ base: c0.base, origen: 'copia', detalle: c0.detalle });
+    }
     set({ cargando: true });
     const c = await cargarBase();
     set({ base: c.base, origen: c.origen, detalle: c.detalle, cargando: false });

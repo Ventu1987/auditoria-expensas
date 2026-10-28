@@ -6,6 +6,7 @@ import type { Extraida, ReglaConcepto } from '../parser/adminprop';
 import { analizar } from '../motor/analisis';
 import { pesos, mesLargo } from '../ui/formato';
 import { useApp } from '../estado';
+import { TablaNovedades } from '../ui/Novedades';
 
 async function leerPdf(f: File): Promise<Extraida> {
   const pdfjs = await import('pdfjs-dist');
@@ -141,14 +142,7 @@ export function Cargar() {
             {!!previa?.length && (
               <>
                 <h3>Novedades respecto del mes anterior</h3>
-                <ul className="novedades">
-                  {previa.map((n, i) => (
-                    <li key={i} className={n.tipo}>
-                      {n.texto}
-                      {n.importe !== undefined && <span className="num"> · {pesos(n.importe)}</span>}
-                    </li>
-                  ))}
-                </ul>
+                <TablaNovedades lista={previa} mes={prep.mes} editable={false} />
               </>
             )}
           </section>

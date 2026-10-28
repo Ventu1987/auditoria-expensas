@@ -4,9 +4,10 @@ import { variaciones } from '../vistas/tablas';
 import { fmt, fmtVar } from './formato';
 
 export function Tabla({ t }: { t: TablaT }) {
-  const [conVar, setConVar] = useState(false);
+  const [conVar, setConVar] = useState(() => typeof window !== 'undefined' && window.innerWidth >= 1100);
   const muestraVar = t.conVariacion && conVar;
   const nCols = t.columnas.length;
+  const hayNota = t.filas.some((f) => f.nota);
   return (
     <section className="card" id={t.id}>
       <header className="card-cab">
@@ -20,29 +21,34 @@ export function Tabla({ t }: { t: TablaT }) {
           </label>
         )}
       </header>
-      <div className="tabla-caja">
-        <table className="tabla">
+      <div className={`tabla-caja${t.compacta ? ' compacta' : ''}`}>
+        <table className={`tabla${(t.ancho ?? 40) <= 12 ? ' angosta' : ''}${t.columnas.length > 8 ? ' densa' : ''}`}>
           <thead>
             <tr>
               <th className="col-txt" style={{ minWidth: `${Math.min(t.ancho ?? 40, 64) * 0.5}em` }}>
                 {t.formatos ? '' : 'Concepto'}
               </th>
-              {t.columnas.map((c) => (
-                <th key={c}>{c}</th>
+              {t.columnas.map((c, j) => (
+                <th key={c} className={t.formatos?.[j] === 'text' ? 'izq' : ''} style={t.anchos?.[j] ? { minWidth: `${t.anchos[j]}em` } : undefined}>
+                  {c}
+                </th>
               ))}
               {muestraVar && t.columnas.slice(1).map((c) => <th key={'v' + c} className="var">Var. {c.slice(0, 2)}</th>)}
-              {t.filas.some((f) => f.nota) && <th>Nota</th>}
+              {hayNota && <th>Nota</th>}
             </tr>
           </thead>
           <tbody>
             {t.filas.map((f, i) =>
               f.estilo === 'seccion' ? (
                 <tr key={i} className="seccion">
-                  <td colSpan={1 + nCols + (muestraVar ? nCols - 1 : 0) + (t.filas.some((x) => x.nota) ? 1 : 0)}>{f.texto}</td>
+                  <td colSpan={1 + nCols + (muestraVar ? nCols - 1 : 0) + (hayNota ? 1 : 0)}>{f.texto}</td>
                 </tr>
               ) : (
-                <tr key={i} className={f.estilo ?? ''}>
-                  <td className="col-txt">{f.texto}</td>
+                <tr key={i} className={f.estilo ?? ''} id={f.id ? `fila-${f.id}` : undefined}>
+                  <td className="col-txt">
+                    {f.texto}
+                    {f.fuente && <span className="fuente"> · {f.fuente}</span>}
+                  </td>
                   {t.columnas.map((_, j) => {
                     const fo = t.formatos?.[j] ?? f.formato ?? 'money';
                     const v = f.valores[j];
@@ -55,7 +61,7 @@ export function Tabla({ t }: { t: TablaT }) {
                   })}
                   {muestraVar &&
                     (f.variacion ? variaciones(f.valores).map((v, j) => <td key={'v' + j} className="num var">{fmtVar(v)}</td>) : t.columnas.slice(1).map((_, j) => <td key={'v' + j} className="var" />))}
-                  {t.filas.some((x) => x.nota) && <td className="nota">{f.nota ?? ''}</td>}
+                  {hayNota && <td className="nota">{f.nota ?? ''}</td>}
                 </tr>
               ),
             )}

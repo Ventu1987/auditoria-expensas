@@ -5,6 +5,7 @@
 import { baseVacia, type Base, type Fila } from './esquema';
 import { REGLAS_CONCEPTO } from '../parser/adminprop';
 import { limpiarBase } from './privacidad';
+import { QUE_ES } from '../motor/expensaNueva';
 import semilla from '../../scripts/semilla/semilla.json';
 
 type Vieja = { sheets: Record<string, Fila[]> };
@@ -209,7 +210,7 @@ export function migrar(vieja: Vieja, privados: string[] = []): Base {
   B.NOTAS.push(...sem.notas, ...NOTAS_GENERALES);
   B.MEDIDAS.push(...MEDIDAS_S2);
   const etiquetas = new Map((V.CONCEPTOS ?? []).map((c) => [s(c.Concepto_Normalizado), s(c.Etiqueta)]));
-  B.CONCEPTOS.push(...REGLAS_CONCEPTO.map((r, i) => ({ Concepto: r.concepto, Etiqueta: etiquetas.get(r.concepto) ?? r.concepto, Patron: r.patron, Orden: i + 1 })));
+  B.CONCEPTOS.push(...REGLAS_CONCEPTO.map((r, i) => ({ Concepto: r.concepto, Etiqueta: etiquetas.get(r.concepto) ?? r.concepto, Patron: r.patron, Orden: i + 1, Que_Es: QUE_ES[r.concepto] ?? '' })));
   for (const x of V.INDICES ?? []) if (x.IPC_Var_Mensual !== '') B.INDICES.push({ Mes: s(x.Mes), IPC_Var_Mensual: n(x.IPC_Var_Mensual), Fuente: s(x.Fuente) });
 
   return limpiarBase(B, privados);

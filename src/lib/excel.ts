@@ -56,8 +56,10 @@ function escribirTabla(ws: any, t: TablaT, r0: number): number {
       r++;
       continue;
     }
-    ws.getCell(r, 1).value = f.texto;
-    if (f.estilo === 'total' || f.estilo === 'negrita') ws.getCell(r, 1).font = { bold: true };
+    ws.getCell(r, 1).value = f.fuente
+      ? { richText: [{ text: f.texto, font: { bold: f.estilo === 'total' || f.estilo === 'negrita' } }, { text: ` · ${f.fuente}`, font: { italic: true, size: 9, color: { argb: 'FF777777' } } }] }
+      : f.texto;
+    if (!f.fuente && (f.estilo === 'total' || f.estilo === 'negrita')) ws.getCell(r, 1).font = { bold: true };
     t.columnas.forEach((_, j) => {
       const v = f.valores[j];
       const fo = t.formatos?.[j] ?? f.formato ?? 'money';

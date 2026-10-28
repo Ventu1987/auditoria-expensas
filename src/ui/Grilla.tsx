@@ -1,4 +1,14 @@
 import { Fragment } from 'react';
+
+/** Baja hasta la fila de la observación en la tabla y la resalta un momento. */
+export function irAFila(codigo: string) {
+  const tr = document.getElementById(`fila-${codigo}`);
+  if (!tr) return;
+  tr.scrollIntoView({ behavior: 'smooth', block: 'center' });
+  tr.classList.remove('destello');
+  void (tr as HTMLElement).offsetWidth;
+  tr.classList.add('destello');
+}
 import type { Analisis } from '../motor/analisis';
 
 export function GrillaRiesgo({ M }: { M: Analisis['matriz'] }) {
@@ -23,9 +33,9 @@ export function GrillaRiesgo({ M }: { M: Analisis['matriz'] }) {
             {fila.celdas.map((c) => (
               <div key={fila.impacto + c.probabilidad} className={`celda p${c.puntaje === 9 ? 'r' : c.puntaje === 6 ? 'a' : 'g'}`}>
                 {c.codigos.map((k) => (
-                  <span key={k} className="codigo">
+                  <button key={k} className="codigo" onClick={() => irAFila(k)} title="Ver la observación">
                     {k}
-                  </span>
+                  </button>
                 ))}
                 {c.resueltos.map((k) => (
                   <span key={k} className="codigo resuelto" title="Resuelto">
@@ -38,7 +48,7 @@ export function GrillaRiesgo({ M }: { M: Analisis['matriz'] }) {
           </Fragment>
         ))}
       </div>
-      <p className="muted xs">Rojo: urgente (probabilidad alta e impacto alto). Ámbar: prioridad alta. Gris: media o baja. Probabilidad: que se repita o siga afectando en los próximos meses.</p>
+      <p className="muted xs">Tocá un código para ir a la observación. Rojo: urgente (probabilidad alta e impacto alto). Ámbar: prioridad alta. Gris: media o baja. Probabilidad: que se repita o siga afectando en los próximos meses.</p>
     </section>
   );
 }
