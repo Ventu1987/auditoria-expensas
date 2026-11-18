@@ -14,8 +14,11 @@ export interface GastoExtraido {
   texto: string;
   proveedor: string;
   cuit: string;
+  /** columna «Gastos Ord.» */
   importe: Cents;
+  /** columnas que no son «Gastos Ord.» ni el total (cuotas extraordinarias) */
   otrasColumnas: Cents;
+  /** importe del gasto: ordinario + extraordinario */
   total: Cents;
   pagina: number;
   estimado: boolean;
@@ -43,15 +46,23 @@ export interface Extraida {
   fechaVencimiento: string; // AAAA-MM-DD
   recargo: string; // "5,50%"
   cuotaCupon: Cents;
+  /** cuota extraordinaria del cupón (0 si no hay) */
+  cuotaCuponExt: Cents;
   gastos: GastoExtraido[];
   rubros: { num: number; nombre: string; total: Cents; pct: string }[];
   totalGastos: Cents;
+  /** total de gastos separado por columna (ord + ext = totalGastos) */
+  totalGastosOrd: Cents;
+  totalGastosExt: Cents;
+  /** columnas de la tabla de gastos: cuántas y si la última es un total */
+  columnasGastos: { cantidad: number; conTotal: boolean };
   prorrateo: {
-    lotes: { lote: number; coefPct: string; cuota: Cents }[];
+    lotes: { lote: number; coefPct: string; cuota: Cents; cuotaExt: Cents }[];
     unidades: number;
     unidadesConDeuda: number;
     lotesConParticulares: number;
-    totales: { saldoAnterior: Cents; pagos: Cents; deuda: Cents; intereses: Cents; repartido: Cents; particulares: Cents; redondeo: Cents; total: Cents };
+    /** repartido = columna «Gastos Ord.»; repartidoExt = columnas extraordinarias */
+    totales: { saldoAnterior: Cents; pagos: Cents; deuda: Cents; intereses: Cents; repartido: Cents; repartidoExt: Cents; particulares: Cents; redondeo: Cents; total: Cents };
   };
   flujo: { fechaInicio: string; fechaCierre: string; saldoAnterior: LineaFlujo; lineas: LineaFlujo[]; saldoCierre: LineaFlujo };
   composicion: { efectivo: Cents; cuentaCorriente: Cents };
@@ -77,31 +88,63 @@ export interface Extraida {
 export interface ReglaConcepto {
   concepto: string;
   patron: string; // expresión regular, sin barras
+  /** orden de evaluación (menor primero) */
+  orden?: number;
+  /** con qué se compara mes a mes cuando la administración junta o separa ítems */
+  grupo?: string;
 }
 
+/** Mantenimiento del Fideicomiso: hasta 10/2026 venía en dos ítems (propios 80% y comunes 20%); desde 11/2026, en uno. */
+export const GRUPO_MANTENIMIENTO = 'Mantenimiento Fideicomiso (propios + comunes)';
+
 /** Reglas por defecto. La planilla (hoja CONCEPTOS, columna Patron) puede reemplazarlas o ampliarlas. */
-export const REGLAS_CONCEPTO: ReglaConcepto[] = [
-  { concepto: 'Impuesto inmobiliario ARBA (plan de pagos)', patron: 'ARBA.*(PLAN|CUOTA\\s*(5\\d|6\\d|7\\d)\\b)' },
-  { concepto: 'Impuesto inmobiliario ARBA (cuota anual del predio)', patron: 'ARBA' },
-  { concepto: 'Electricidad sectores comunes - Fideicomiso', patron: 'EDENOR.*SECTORES\\s+COMUNES' },
-  { concepto: 'Electricidad - EDENOR', patron: 'EDENOR' },
-  { concepto: 'Control de plagas / desratización', patron: 'PLAGAS|DESRATIZ' },
-  { concepto: 'Mantenimiento Fideicomiso - espacios propios 80%', patron: 'ESPACIOS\\s+PROPIOS' },
-  { concepto: 'Mantenimiento Fideicomiso - espacios comunes 20%', patron: 'ESPACIOS\\s+COMUNES' },
-  { concepto: 'Sistema AdminProp', patron: 'ADMINPROP' },
-  { concepto: 'Telered', patron: 'TELERED' },
-  { concepto: 'Caja chica Fideicomiso', patron: 'CAJA\\s+CHICA' },
-  { concepto: 'Reparación - control remoto (materiales + M.O.)', patron: 'CONTROL\\s+REMOTO' },
-  { concepto: 'Reparación portón vehicular', patron: 'PORT[OÓ]N' },
-  { concepto: 'Honorarios administración', patron: 'HONORARIOS' },
-  { concepto: 'Gastos bancarios - Galicia', patron: 'GALICIA' },
-  { concepto: 'Gastos bancarios - Roela', patron: 'ROELA' },
-  { concepto: 'Seguro responsabilidad civil', patron: 'SEGURO|P[OÓ]LIZA' },
-  { concepto: 'Bidones de agua garita', patron: 'BIDONES' },
-  { concepto: 'Obra de cámaras (obra civil)', patron: 'OBRA\\s+CIVIL|ADICIONES\\s+OBRA' },
-  { concepto: 'Equipamiento CCTV (PC, monitores, UPS)', patron: 'CCTV|MONITORES|\\bUPS\\b' },
-  { concepto: 'Servicio de seguridad / vigilancia', patron: 'SEGURIDAD|VIGILANCIA' },
-];
+export const REGLAS_CONCEPTO: ReglaConcepto[] = (
+  [
+    { concepto: 'Impuesto inmobiliario ARBA (plan de pagos)', patron: 'ARBA.*(PLAN|CUOTA\\s*(5\\d|6\\d|7\\d)\\b)' },
+    { concepto: 'Impuesto inmobiliario ARBA (cuota anual del predio)', patron: 'ARBA' },
+    { concepto: 'Electricidad sectores comunes - Fideicomiso', patron: 'EDENOR.*SECTORES\\s+COMUNES' },
+    { concepto: 'Electricidad - EDENOR', patron: 'EDENOR' },
+    { concepto: 'Control de plagas / desratización', patron: 'PLAGAS|DESRATIZ' },
+    // desde 11/2026: un solo ítem «gastos de mantenimiento» del Fideicomiso. Va antes que propios y comunes;
+    // no agarra los ítems viejos (que dicen ESPACIOS PROPIOS o ESPACIOS COMUNES por separado), ni caja chica ni bancos.
+    {
+      concepto: GRUPO_MANTENIMIENTO,
+      patron: '^(?!.*(CAJA\\s+CHICA|GALICIA|ROELA|BANCO|CUENTA|\\bCTA\\b)).*(PROPIOS.*COMUNES|COMUNES.*PROPIOS|GASTOS\\s+DE\\s+MANTENIMIENTO|FIDEICOMISO(?!.*ESPACIOS\\s+(PROPIOS|COMUNES)).*MANTENIMIENTO)',
+      orden: 5.5,
+      grupo: GRUPO_MANTENIMIENTO,
+    },
+    { concepto: 'Mantenimiento Fideicomiso - espacios propios 80%', patron: 'ESPACIOS\\s+PROPIOS', grupo: GRUPO_MANTENIMIENTO },
+    { concepto: 'Mantenimiento Fideicomiso - espacios comunes 20%', patron: 'ESPACIOS\\s+COMUNES', grupo: GRUPO_MANTENIMIENTO },
+    { concepto: 'Sistema AdminProp', patron: 'ADMINPROP' },
+    { concepto: 'Telered', patron: 'TELERED' },
+    { concepto: 'Caja chica Fideicomiso', patron: 'CAJA\\s+CHICA' },
+    { concepto: 'Reparación - control remoto (materiales + M.O.)', patron: 'CONTROL\\s+REMOTO' },
+    { concepto: 'Reparación portón vehicular', patron: 'PORT[OÓ]N' },
+    { concepto: 'Honorarios administración', patron: 'HONORARIOS' },
+    { concepto: 'Gastos bancarios - Galicia', patron: 'GALICIA' },
+    { concepto: 'Gastos bancarios - Roela', patron: 'ROELA' },
+    { concepto: 'Seguro responsabilidad civil', patron: 'SEGURO|P[OÓ]LIZA' },
+    { concepto: 'Bidones de agua garita', patron: 'BIDONES' },
+    // cuota extraordinaria de las cámaras (Cruz de Malta, la empresa de seguridad): antes que obra, CCTV y SEGURIDAD
+    { concepto: 'Cámaras de seguridad - cuota extraordinaria', patron: 'C[AÁ]MARAS?.*CUOTA|CUOTA.*C[AÁ]MARAS?|EXTRAORDINARI.*C[AÁ]MARAS?|C[AÁ]MARAS?.*EXTRAORDINARI|CRUZ\\s+DE\\s+MALTA.*(CUOTA|EXTRAORDINARI)', orden: 17.5 },
+    { concepto: 'Obra de cámaras (obra civil)', patron: 'OBRA\\s+CIVIL|ADICIONES\\s+OBRA' },
+    { concepto: 'Equipamiento CCTV (PC, monitores, UPS)', patron: 'CCTV|MONITORES|\\bUPS\\b' },
+    { concepto: 'Servicio de seguridad / vigilancia', patron: 'SEGURIDAD|VIGILANCIA' },
+  ] as ReglaConcepto[]
+).map((r, i, todas) => ({ ...r, orden: r.orden ?? todas.slice(0, i + 1).filter((x) => x.orden === undefined).length }));
+
+/** Grupo de comparación de cada concepto por defecto (la hoja CONCEPTOS, columna Grupo, lo puede cambiar). */
+export const GRUPOS_CONCEPTO: Record<string, string> = Object.fromEntries(REGLAS_CONCEPTO.filter((r) => r.grupo).map((r) => [r.concepto, r.grupo!]));
+
+/**
+ * Reglas de la planilla combinadas con las de la app: la planilla manda para los conceptos que tiene;
+ * los conceptos nuevos de la app (por ejemplo, los de 11/2026) se agregan en su orden aunque la planilla no los tenga todavía.
+ */
+export function combinarReglas(planilla: ReglaConcepto[]): ReglaConcepto[] {
+  const porConcepto = new Map(REGLAS_CONCEPTO.map((r) => [r.concepto, r]));
+  for (const r of planilla) porConcepto.set(r.concepto, { ...porConcepto.get(r.concepto), ...r, orden: r.orden ?? porConcepto.get(r.concepto)?.orden ?? 999 });
+  return [...porConcepto.values()].sort((a, b) => (a.orden ?? 999) - (b.orden ?? 999));
+}
 
 export function clasificar(texto: string, reglas: ReglaConcepto[] = REGLAS_CONCEPTO): string {
   for (const r of reglas) {
@@ -136,9 +179,9 @@ function esImporte(t: string): boolean {
   return RE_IMPORTE.test(t.trim()) && /\d/.test(t);
 }
 
-/** Importes de una línea, cada uno con la posición del signo $ que lo precede (o la suya). */
-function importesConPeso(partes: Fragmento[]): { x: number; v: Cents }[] {
-  const out: { x: number; v: Cents }[] = [];
+/** Importes de una línea, cada uno con la posición del signo $ que lo precede (o la suya) y dónde termina el número. */
+function importesConPeso(partes: Fragmento[]): { x: number; x2: number; v: Cents }[] {
+  const out: { x: number; x2: number; v: Cents }[] = [];
   let pesoX: number | null = null;
   for (const p of partes) {
     const t = p.t.trim();
@@ -147,17 +190,64 @@ function importesConPeso(partes: Fragmento[]): { x: number; v: Cents }[] {
       continue;
     }
     if (/^\$\s*-?[\d.,]+$/.test(t)) {
-      out.push({ x: p.x, v: aCentavos(t) ?? 0 });
+      out.push({ x: p.x, x2: p.x2, v: aCentavos(t) ?? 0 });
       pesoX = null;
       continue;
     }
     if (pesoX !== null) {
-      if (t === '-') out.push({ x: pesoX, v: 0 });
-      else if (esImporte(t)) out.push({ x: pesoX, v: aCentavos(t) ?? 0 });
+      if (t === '-') out.push({ x: pesoX, x2: p.x2, v: 0 });
+      else if (esImporte(t)) out.push({ x: pesoX, x2: p.x2, v: aCentavos(t) ?? 0 });
       pesoX = null;
     }
   }
   return out;
+}
+
+// ---------- columnas de la tabla de gastos ----------
+// Hasta 10/2026 la tabla tenía una sola columna («Gastos Ord.»). Con una cuota extraordinaria aparece la columna
+// «Gastos Extraord.», con o sin una columna de total. El importe de cada gasto es la suma de sus columnas
+// (o la columna total, si existe): nunca solo la última columna.
+
+export interface ColumnasGastos {
+  /** dónde termina el número de cada columna (las columnas van alineadas a la derecha) */
+  x2: number[];
+  /** la última columna es la suma de las demás */
+  conTotal: boolean;
+}
+
+/** Arma las columnas a partir de los importes de la línea «TOTAL DE GASTOS» (o de un «TOTAL RUBRO»). */
+export function columnasDe(imps: { x2: number; v: Cents }[], cabeceraConTotal = false): ColumnasGastos {
+  const n = imps.length;
+  const ultimaEsSuma = n >= 2 && imps[n - 1].v === imps.slice(0, -1).reduce((a, b) => a + b.v, 0);
+  return { x2: imps.map((i) => i.x2), conTotal: n >= 2 && (ultimaEsSuma || cabeceraConTotal) };
+}
+
+/** Reparte los importes de una línea en ordinario, extraordinario y total según las columnas. */
+export function repartirColumnas(imps: { x2: number; v: Cents }[], cols: ColumnasGastos | null): { ord: Cents; ext: Cents; total: Cents } {
+  if (!imps.length) return { ord: 0, ext: 0, total: 0 };
+  const n = cols?.x2.length ?? 0;
+  if (!cols || n <= 1) {
+    // una sola columna, o no se sabe: como antes (el primero es ordinario y el último el total)
+    const total = imps.at(-1)!.v;
+    const ord = imps.length > 1 ? imps[0].v : total;
+    return { ord, ext: imps.slice(1, -1).reduce((a, b) => a + b.v, 0), total };
+  }
+  // cada importe a la columna más cercana; si dos caen en la misma, se usa el orden
+  const k = imps.map((im) => {
+    const d = cols.x2.map((x) => Math.abs(x - im.x2));
+    return d.indexOf(Math.min(...d));
+  });
+  const porOrden = new Set(k).size !== k.length || (imps.length === n && k.some((v, i) => v !== i));
+  const vals: (Cents | null)[] = Array(n).fill(null);
+  imps.forEach((im, i) => {
+    const j = porOrden ? Math.min(i, n - 1) : k[i];
+    vals[j] = (vals[j] ?? 0) + im.v;
+  });
+  const cuerpo = cols.conTotal ? vals.slice(0, -1) : vals;
+  const ord = cuerpo[0] ?? 0;
+  const ext = cuerpo.slice(1).reduce<number>((a, b) => a + (b ?? 0), 0);
+  const total = cols.conTotal && vals[n - 1] !== null ? vals[n - 1]! : ord + ext;
+  return { ord, ext, total };
 }
 
 const MESES: Record<string, string> = {
@@ -188,12 +278,27 @@ function limpiar(lineas: Linea[]): Linea[] {
   return out;
 }
 
+/**
+ * Totales del prorrateo, después de la columna del %: Gastos Ord., [columnas extraordinarias], Part., Redondeo, Total.
+ * Hasta 10/2026 eran 4 columnas; con una cuota extraordinaria, 5 o más.
+ */
+export function totalesProrrateo(post: Cents[]): { repartido: Cents; repartidoExt: Cents; particulares: Cents; redondeo: Cents; total: Cents } {
+  const n = post.length;
+  return {
+    repartido: post[0] ?? 0,
+    repartidoExt: n >= 5 ? post.slice(1, -3).reduce((a, b) => a + b, 0) : 0,
+    particulares: n >= 4 ? post[n - 3] : 0,
+    redondeo: n >= 2 ? post[n - 2] : 0,
+    total: post.at(-1) ?? 0,
+  };
+}
+
 // ---------- lector ----------
 export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = REGLAS_CONCEPTO): Extraida {
   const L = limpiar(lineasPdf);
   const avisos: string[] = [];
   const idx = (re: RegExp, desde = 0) => {
-    for (let i = desde; i < L.length; i++) if (re.test(L[i].texto)) return i;
+    for (let i = Math.max(desde, 0); i < L.length; i++) if (re.test(L[i].texto)) return i;
     return -1;
   };
   const corte = idx(/RECIBO DE COBRO/);
@@ -215,13 +320,33 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
   const recargo = mVto?.[2] ?? '';
   const lCuota = L.slice(0, 40).find((l) => /^Gastos Ord\./.test(l.texto) && /\d{1,2}\/\d{4}/.test(l.texto));
   const cuotaCupon = lCuota ? importesConPeso(lCuota.partes).at(-1)?.v ?? 0 : 0;
+  const lCuotaExt = L.slice(0, 40).find((l) => /^Gastos Ext/i.test(l.texto) && /\d{1,2}\/\d{4}/.test(l.texto));
+  const cuotaCuponExt = lCuotaExt ? importesConPeso(lCuotaExt.partes).at(-1)?.v ?? 0 : 0;
 
   // --- gastos ---
   const gastos: GastoExtraido[] = [];
   const rubros: Extraida['rubros'] = [];
   let totalGastos = 0;
+  let totalGastosOrd = 0;
+  let totalGastosExt = 0;
   const iG = idx(/GASTOS DEL PER[IÍ]ODO/);
   const iGfin = idx(/^TOTAL DE GASTOS/, iG);
+  // columnas: se leen de la línea del total (tiene un importe en cada columna) y de los títulos de los rubros
+  const impsTotal = (l: Linea) => {
+    const conPeso = importesConPeso(l.partes);
+    if (conPeso.length) return conPeso;
+    // sin signo $: los números de la línea, salvo los porcentajes ("100,00%" o "100,00" seguido de "%")
+    return l.partes
+      .filter((q, j) => !/%$/.test(q.t) && l.partes[j + 1]?.t !== '%')
+      .map((q) => ({ x: q.x, x2: q.x2, v: aCentavos(q.t) }))
+      .filter((q): q is { x: number; x2: number; v: number } => q.v !== null);
+  };
+  const cabeceras = iG >= 0 && iGfin >= 0 ? L.slice(iG, iGfin).filter((l) => /Gastos Ord\./.test(l.texto)) : [];
+  const cabeceraConTotal = cabeceras.some((l) => l.partes.some((q) => /^Total$/i.test(q.t)));
+  const impsFin = iGfin >= 0 ? impsTotal(L[iGfin]) : [];
+  // varias columnas solo si los títulos las nombran o la línea del total tiene más de un importe con $
+  const variasColumnas = cabeceras.some((l) => /Extraord|Gastos Ext/i.test(l.texto)) || importesConPeso(iGfin >= 0 ? L[iGfin].partes : []).length >= 2;
+  const colsGastos = variasColumnas ? columnasDe(impsFin, cabeceraConTotal) : null;
   let rubroNum = 0;
   let rubro = '';
   let actual: { item: string; textos: string[]; pagina: number } | null = null;
@@ -237,13 +362,15 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
     }
     const mT = t.match(/^TOTAL RUBRO\s+(\d+)\s+([\d.,]+%)/);
     if (mT) {
-      const v = importesConPeso(l.partes).at(-1)?.v ?? 0;
+      const v = repartirColumnas(importesConPeso(l.partes), colsGastos).total;
       rubros.push({ num: Number(mT[1]), nombre: rubro, total: v, pct: mT[2] });
       continue;
     }
     if (/^TOTAL DE GASTOS/.test(t)) {
-      const nums = l.partes.map((p) => aCentavos(p.t)).filter((v): v is number => v !== null);
-      totalGastos = nums.at(-1) ?? 0;
+      const r = repartirColumnas(impsTotal(l), colsGastos);
+      totalGastos = r.total;
+      totalGastosOrd = r.ord;
+      totalGastosExt = r.ext;
       break;
     }
     // ¿empieza un ítem?
@@ -261,9 +388,7 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
       .join(' ');
     if (textoLinea) actual.textos.push(textoLinea);
     if (imps.length) {
-      const total = imps.at(-1)!.v;
-      const importe = imps.length > 1 ? imps[0].v : total;
-      const otras = imps.slice(1, -1).reduce((a, b) => a + b.v, 0);
+      const { ord: importe, ext: otras, total } = repartirColumnas(imps, colsGastos);
       const texto = actual.textos.join(' ').replace(/\s+/g, ' ').trim();
       const mP = texto.match(/^(.+?)\s*\((\d{2}-?\d{8}-?\d)\)\s*-?\s*/);
       const proveedor = mP ? mP[1].trim() : texto.split(' - ')[0].trim();
@@ -303,7 +428,7 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
   const lotes: Extraida['prorrateo']['lotes'] = [];
   let unidadesConDeuda = 0;
   let lotesConParticulares = 0;
-  const totales = { saldoAnterior: 0, pagos: 0, deuda: 0, intereses: 0, repartido: 0, particulares: 0, redondeo: 0, total: 0 };
+  const totales = { saldoAnterior: 0, pagos: 0, deuda: 0, intereses: 0, repartido: 0, repartidoExt: 0, particulares: 0, redondeo: 0, total: 0 };
   for (let i = iP + 1; i < iPfin && i > 0; i++) {
     const l = L[i];
     const p = l.partes;
@@ -317,7 +442,9 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
         if (deuda > 0) unidadesConDeuda++;
         const part = antes.at(-2)!.t === '-' ? 0 : aCentavos(antes.at(-2)!.t) ?? 0;
         if (part !== 0) lotesConParticulares++;
-        lotes.push({ lote: Number(p[0].t), coefPct: antes[4].t, cuota: aCentavos(antes[5].t) ?? 0 });
+        // entre la cuota ordinaria y los particulares pueden venir columnas extraordinarias
+        const cuotaExt = antes.slice(6, -2).reduce((a, q) => a + (q.t === '-' ? 0 : aCentavos(q.t) ?? 0), 0);
+        lotes.push({ lote: Number(p[0].t), coefPct: antes[4].t, cuota: aCentavos(antes[5].t) ?? 0, cuotaExt });
       } else avisos.push(`Prorrateo: no se pudo leer la fila del lote ${p[0].t}.`);
     }
     if (/^TOTALES/.test(l.texto)) {
@@ -342,10 +469,7 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
       const pre = nums(tokens.slice(0, iPct));
       const post = nums(tokens.slice(iPct + 1));
       [totales.saldoAnterior, totales.pagos, totales.deuda, totales.intereses] = [pre[0] ?? 0, pre[1] ?? 0, pre[2] ?? 0, pre[3] ?? 0];
-      totales.repartido = post[0] ?? 0;
-      totales.total = post.at(-1) ?? 0;
-      totales.redondeo = post.at(-2) ?? 0;
-      totales.particulares = post.length >= 4 ? post.at(-3)! : 0;
+      Object.assign(totales, totalesProrrateo(post));
     }
   }
 
@@ -367,10 +491,12 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
   };
   const iSA = idx(/^Saldo anterior al/, iF);
   const iSC = idx(/^Saldo al cierre/, iF);
-  const saldoAnterior = linFlujo(L[iSA]);
-  const saldoCierre = linFlujo(L[iSC]);
+  const vacia: LineaFlujo = { concepto: '', ord: 0, ext: 0, total: 0 };
+  if (iSA < 0 || iSC < 0) avisos.push('No se encontró el detalle de egresos e ingresos (saldo anterior y saldo al cierre).');
+  const saldoAnterior = iSA >= 0 ? linFlujo(L[iSA]) : vacia;
+  const saldoCierre = iSC >= 0 ? linFlujo(L[iSC]) : vacia;
   const lineasFlujo: LineaFlujo[] = [];
-  for (let i = iSA + 1; i < iSC; i++) {
+  for (let i = iSA + 1; iSA >= 0 && i < iSC; i++) {
     const lf = linFlujo(L[i]);
     if (lf.concepto) lineasFlujo.push(lf);
     else if (lineasFlujo.length) {
@@ -384,6 +510,7 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
 
   // --- composición y resumen bancario ---
   const valorDe = (re: RegExp, desde = 0, hasta = fin) => {
+    if (desde < 0) return 0; // la sección no está en el documento
     for (let i = desde; i < hasta; i++) if (re.test(L[i].texto)) return importesConPeso(L[i].partes).at(-1)?.v ?? 0;
     return 0;
   };
@@ -490,7 +617,7 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
 
   // --- controles ---
   const controles: Extraida['controles'] = [];
-  const ctl = (control: string, documento: Cents, calculado: Cents) => controles.push({ control, documento, calculado, ok: documento === calculado });
+  const ctl = (control: string, documento: Cents, calculado: Cents, tolerancia = 0) => controles.push({ control, documento, calculado, ok: Math.abs(documento - calculado) <= tolerancia });
   for (const r of rubros) ctl(`Rubro ${r.num}: suma de sus gastos`, r.total, gastos.filter((g) => g.rubroNum === r.num).reduce((a, g) => a + g.total, 0));
   ctl('Total de gastos: suma de los rubros', totalGastos, rubros.reduce((a, r) => a + r.total, 0));
   ctl('Total de gastos: suma de los ítems', totalGastos, gastos.reduce((a, g) => a + g.total, 0));
@@ -504,7 +631,16 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
     patrimonio.patrimonioNeto,
     patrimonio.disponibilidades + patrimonio.expensasACobrar + patrimonio.deudasACobrar + patrimonio.interesesACobrar + patrimonio.redondeo + patrimonio.devengadosPendientes,
   );
-  ctl('Expensas a cobrar = repartido + particulares', patrimonio.expensasACobrar, totales.repartido + totales.particulares);
+  ctl('Expensas a cobrar = repartido (ord. + extraord.) + particulares', patrimonio.expensasACobrar, totales.repartido + totales.repartidoExt + totales.particulares);
+  // Lo que se reparte entre los lotes (columnas Gastos Ord. + Gastos Extraord. del prorrateo) tiene que ser el total de gastos del mes.
+  // Las deudas, los intereses, los particulares y el redondeo van aparte. Se tolera hasta $ 1.000 por el redondeo de los coeficientes.
+  ctl('Repartido (Gastos Ord. + Extraord. del prorrateo) = total de gastos', totalGastos, totales.repartido + totales.repartidoExt, 100000);
+  if (totalGastosExt || totales.repartidoExt) ctl('Gastos extraordinarios: columna del prorrateo = columna de gastos', totalGastosExt, totales.repartidoExt, 100000);
+  ctl(
+    'Prorrateo: deuda + intereses + repartido + particulares + redondeo = total',
+    totales.total,
+    totales.deuda + totales.intereses + totales.repartido + totales.repartidoExt + totales.particulares + totales.redondeo,
+  );
   ctl('Cobros no identificados del mes contra el flujo', lineasFlujo.find((x) => /no identificados/i.test(x.concepto))?.total ?? 0, cobrosNoIdentificados.filter((c) => c.mes === mes).reduce((a, c) => a + c.importe, 0));
   if (libres.length) avisos.push(`${libres.length} gasto(s) pendiente(s) de pago no se pudieron asociar a un gasto del mes.`);
   if (gastos.some((g) => g.concepto === 'Otro (revisar)')) avisos.push('Hay gastos que no coinciden con ningún concepto conocido: revisalos.');
@@ -520,9 +656,13 @@ export function leerLiquidacion(lineasPdf: Linea[], reglas: ReglaConcepto[] = RE
     fechaVencimiento,
     recargo,
     cuotaCupon,
+    cuotaCuponExt,
     gastos,
     rubros,
     totalGastos,
+    totalGastosOrd,
+    totalGastosExt,
+    columnasGastos: { cantidad: colsGastos?.x2.length ?? 1, conTotal: colsGastos?.conTotal ?? false },
     prorrateo: { lotes, unidades: lotes.length, unidadesConDeuda, lotesConParticulares, totales },
     flujo: { fechaInicio, fechaCierre, saldoAnterior, lineas: lineasFlujo, saldoCierre },
     composicion,

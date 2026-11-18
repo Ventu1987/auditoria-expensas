@@ -1,5 +1,5 @@
 import type { Fila } from '../data/esquema';
-import { c, contexto, correcciones, etiqueta, hay, importeCorrecto, mesesCorregidos, notas, prorr, sum, type Cents, type Ctx } from './base';
+import { c, contexto, correcciones, etiqueta, hay, importeCorrecto, mesesCorregidos, notas, prorr, repartidoTotal, sum, type Cents, type Ctx } from './base';
 import type { Base } from '../data/esquema';
 
 export type Serie = (Cents | null)[];
@@ -16,9 +16,19 @@ export interface Resumen {
   gasto: Cents[];
   gastoInformado: Cents[];
   controlGasto: Cents[];
+  /** columna «Gastos Ord.» del prorrateo */
   repartido: Cents[];
+  /** columnas extraordinarias del prorrateo (cuotas extraordinarias) */
+  repartidoExt: Cents[];
+  /** ord. + extraord.: lo que se cobró por los gastos del mes */
+  repartidoTotal: Cents[];
   repartidoMenosGasto: Cents[];
+  gastoExt: Cents[];
+  /** cuota ordinaria del lote común (cupón) */
   cuota: Cents[];
+  cuotaExt: Cents[];
+  /** cuota ordinaria + extraordinaria */
+  cuotaTotal: Cents[];
   coefPct: (number | null)[];
   reducida: Serie;
   relReducida: (number | null)[];
@@ -65,15 +75,21 @@ export function resumen(base: Base, barrio: string, ctxIn?: Ctx): Resumen {
   const gasto = M.map((m) => sum(ctx.gastos(m).map((g) => c(g.Importe))));
   const gastoInformado = M.map((m) => c(P(m).Total_Gastos));
   const repartido = M.map((m) => c(P(m).Repartido));
+  const repartidoExt = M.map((m) => c(P(m).Repartido_Ext));
+  const repTotal = M.map((m) => repartidoTotal(P(m)));
+  const gastoExt = M.map((m) => sum(ctx.gastos(m).map((g) => c(g.Otras_Columnas))));
   const cuota = M.map((m) => c(P(m).Cuota_Lote_Comun));
+  const cuotaExt = M.map((m, i) => (hay(P(m).Cuota_Lote_Ext) && c(P(m).Cuota_Lote_Ext) ? c(P(m).Cuota_Lote_Ext) : repartidoExt[i] ? prorr(repartidoExt[i], ctx.coef(m).num, ctx.coef(m).den) : 0));
+  const cuotaTotal = M.map((_, i) => cuota[i] + cuotaExt[i]);
   const red = ctx.barrioFila?.Coef_Lote_Reducido;
   const reducida = M.map((m, i) => (hay(P(m).Cuota_Lote_Reducido) ? c(P(m).Cuota_Lote_Reducido) : hay(red) ? repartido[i] - (Number(P(m).Unidades) - 1) * cuota[i] : null));
   const particulares = M.map((m) => c(P(m).Gastos_Particulares));
   const totalInformado = M.map((m) => c(P(m).Total_Expensas));
-  const totalCalculado = M.map((_, i) => repartido[i] + particulares[i]);
+  const totalCalculado = M.map((_, i) => repTotal[i] + particulares[i]);
   const gastoCorrecto = M.map((m) => (corrMeses.has(m) ? sum(ctx.gastos(m).map((g) => importeCorrecto(g, corr))) : null));
   const cuotaCorrecta = M.map((m, i) => (gastoCorrecto[i] === null ? null : prorr(gastoCorrecto[i]!, ctx.coef(m).num, ctx.coef(m).den)));
-  const deMasLote = M.map((_, i) => (cuotaCorrecta[i] === null ? null : cuota[i] - cuotaCorrecta[i]!));
+  // la cuota correcta reparte todo el gasto (ord. + extraord.): se compara con la cuota ord. + extraord.
+  const deMasLote = M.map((_, i) => (cuotaCorrecta[i] === null ? null : cuotaTotal[i] - cuotaCorrecta[i]!));
   return {
     meses: M,
     rubros: rubros.map((r) => ({ ...r, nombre: `${r.num}. ${r.nombre}` })),
@@ -81,8 +97,13 @@ export function resumen(base: Base, barrio: string, ctxIn?: Ctx): Resumen {
     gastoInformado,
     controlGasto: M.map((_, i) => gasto[i] - gastoInformado[i]),
     repartido,
-    repartidoMenosGasto: M.map((_, i) => repartido[i] - gasto[i]),
+    repartidoExt,
+    repartidoTotal: repTotal,
+    repartidoMenosGasto: M.map((_, i) => repTotal[i] - gasto[i]),
+    gastoExt,
     cuota,
+    cuotaExt,
+    cuotaTotal,
     coefPct: M.map((_, i) => (repartido[i] ? cuota[i] / repartido[i] : null)),
     reducida,
     relReducida: M.map((_, i) => (reducida[i] !== null && cuota[i] ? reducida[i]! / cuota[i] : null)),
@@ -91,13 +112,13 @@ export function resumen(base: Base, barrio: string, ctxIn?: Ctx): Resumen {
     totalCalculado,
     totalInformado,
     controlTotal: M.map((_, i) => totalCalculado[i] - totalInformado[i]),
-    cobradoOrdinario: repartido,
+    cobradoOrdinario: repTotal,
     corregido: M.map((m) => corrMeses.has(m)),
     gastoCorrecto,
     cuotaCorrecta,
     deMasLote,
-    deMasPct: M.map((_, i) => (deMasLote[i] === null || !cuota[i] ? null : deMasLote[i]! / cuota[i])),
-    deMasBarrio: M.map((_, i) => (gastoCorrecto[i] === null ? null : repartido[i] - gastoCorrecto[i]!)),
+    deMasPct: M.map((_, i) => (deMasLote[i] === null || !cuotaTotal[i] ? null : deMasLote[i]! / cuotaTotal[i])),
+    deMasBarrio: M.map((_, i) => (gastoCorrecto[i] === null ? null : repTotal[i] - gastoCorrecto[i]!)),
     peso: rubros.map((r) => ({ nombre: `${r.num}. ${r.nombre}`, serie: M.map((_, i) => (gasto[i] ? r.serie[i] / gasto[i] : null)) })),
     notas: notas(base, barrio, 'RESUMEN'),
   };

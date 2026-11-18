@@ -1,0 +1,5 @@
+node_modules/
+dist/
+# las liquidaciones tienen el padrón: nunca se suben
+*.pdf
+tests/pdf/

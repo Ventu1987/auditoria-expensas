@@ -82,7 +82,8 @@ describe('Senderos II · cifras del Excel al centavo', () => {
     const pos = montos.filter((m) => m >= 0);
     expect(pos).toEqual([...pos].sort((a, b) => b - a));
     expect(N.find((n) => n.clave === 'Telered')!.aclaracion).toMatch(/100\.000/);
-    expect(N.find((n) => n.clave.startsWith('Mantenimiento Fideicomiso - espacios propios'))!.aclaracion).toMatch(/236\.474,77/);
+    // propios y comunes se comparan juntos (grupo): la aclaración escrita para «propios» sigue apareciendo
+    expect(N.find((n) => n.clave === 'Mantenimiento Fideicomiso (propios + comunes)')!.aclaracion).toMatch(/236\.474,77/);
   });
 
   it('consolidado: la seguridad es igual al centavo en los dos barrios', () => {

@@ -2,7 +2,7 @@ import { useMemo, useState } from 'react';
 import type { Base, Fila } from '../data/esquema';
 import { enviar, subirArchivo } from '../data/api';
 import { prepararCarga, type Preparada } from '../data/cargar';
-import type { Extraida, ReglaConcepto } from '../parser/adminprop';
+import { combinarReglas, REGLAS_CONCEPTO, type Extraida, type ReglaConcepto } from '../parser/adminprop';
 import { analizar } from '../motor/analisis';
 import { pesos, mesLargo } from '../ui/formato';
 import { useApp } from '../estado';
@@ -17,9 +17,10 @@ async function leerPdf(f: File): Promise<Extraida> {
   return { ...leerLiquidacion(await lineasDePdf(new Uint8Array(await f.arrayBuffer()), pdfjs as never), reglasDe(useApp.getState().base)) };
 }
 
-function reglasDe(base: Base | null): ReglaConcepto[] | undefined {
-  const cs = (base?.CONCEPTOS ?? []).filter((c) => c.Patron).sort((a, b) => Number(a.Orden) - Number(b.Orden));
-  return cs.length ? cs.map((c) => ({ concepto: String(c.Concepto), patron: String(c.Patron) })) : undefined;
+/** Reglas de la hoja CONCEPTOS, más los conceptos nuevos de la app que la hoja todavía no tiene. */
+function reglasDe(base: Base | null): ReglaConcepto[] {
+  const cs = (base?.CONCEPTOS ?? []).filter((c) => c.Patron);
+  return combinarReglas(cs.map((c) => ({ concepto: String(c.Concepto), patron: String(c.Patron), orden: c.Orden === '' || c.Orden === undefined ? undefined : Number(c.Orden) })));
 }
 
 export function Cargar() {
@@ -30,13 +31,24 @@ export function Cargar() {
   const [aplicar, setAplicar] = useState<Record<string, boolean>>({});
   const [estado, setEstado] = useState<{ tipo: 'ok' | 'error' | 'info'; texto: string } | null>(null);
   const [ocupado, setOcupado] = useState(false);
-  const conceptos = useMemo(() => (base?.CONCEPTOS ?? []).map((c) => String(c.Concepto)), [base]);
+  const conceptos = useMemo(() => [...new Set([...(base?.CONCEPTOS ?? []).map((c) => String(c.Concepto)), ...REGLAS_CONCEPTO.map((r) => r.concepto)])], [base]);
 
   // vista previa del análisis con el mes nuevo
   const previa = useMemo(() => {
     if (!prep || !base) return null;
-    const nueva = Object.fromEntries(Object.entries(base).map(([h, fs]) => [h, (fs as Fila[]).filter((f) => !(f.Barrio === barrio && f.Mes === prep.mes && h !== 'HALLAZGOS'))])) as unknown as Base;
-    for (const [h, fs] of Object.entries(prep.filas)) (nueva as unknown as Record<string, Fila[]>)[h] = [...(nueva as unknown as Record<string, Fila[]>)[h], ...(fs as Fila[])];
+    // igual que la planilla al confirmar (Code.gs · cargarLiquidacion_): se reemplazan las hojas por mes y las correcciones
+    // sugeridas del mes; las correcciones aplicadas a mano, las notas y la expensa nueva se conservan
+    const POR_MES = ['PERIODOS', 'GASTOS', 'FLUJO', 'PAGOS_ANTERIORES', 'PENDIENTES', 'NO_IDENTIFICADOS', 'COEFICIENTES'];
+    const delMes = (f: Fila) => f.Barrio === barrio && f.Mes === prep.mes;
+    const nueva = Object.fromEntries(
+      Object.entries(base).map(([h, fs]) => [h, (fs as Fila[]).filter((f) => !(delMes(f) && (POR_MES.includes(h) || (h === 'CORRECCIONES' && f.Estado === 'SUGERIDA'))))]),
+    ) as unknown as Base;
+    for (const [h, fs] of Object.entries(prep.filas)) {
+      const actuales = (nueva as unknown as Record<string, Fila[]>)[h];
+      const id = h === 'CORRECCIONES' ? 'ID_Correccion' : h === 'EVENTOS' ? 'ID_Evento' : h === 'HALLAZGOS' ? 'ID_Hallazgo' : '';
+      const nuevas = id ? (fs as Fila[]).filter((f) => !actuales.some((x) => x[id] === f[id])) : (fs as Fila[]);
+      (nueva as unknown as Record<string, Fila[]>)[h] = [...actuales, ...nuevas];
+    }
     try {
       return analizar(nueva, barrio).novedades;
     } catch {
@@ -158,6 +170,7 @@ export function Cargar() {
                     <th className="col-txt">Texto de la liquidación</th>
                     <th>Concepto</th>
                     <th>Importe</th>
+                    {(prep.filas.GASTOS ?? []).some((g) => Number(g.Otras_Columnas)) && <th>De eso, extraordinario</th>}
                     <th>Estimado</th>
                     <th>Pago</th>
                   </tr>
@@ -175,6 +188,7 @@ export function Cargar() {
                         </select>
                       </td>
                       <td className="num">{pesos(Math.round(Number(g.Importe) * 100))}</td>
+                      {(prep.filas.GASTOS ?? []).some((x) => Number(x.Otras_Columnas)) && <td className="num">{Number(g.Otras_Columnas) ? pesos(Math.round(Number(g.Otras_Columnas) * 100)) : ''}</td>}
                       <td className="txt">{g.Es_Estimado === 'SI' ? 'Sí' : ''}</td>
                       <td className="txt small">{g.Estado_Pago === 'PENDIENTE' ? 'Pendiente' : 'Pagado'}</td>
                     </tr>

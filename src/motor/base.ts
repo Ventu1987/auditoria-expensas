@@ -1,6 +1,7 @@
 // Ayudas comunes del motor de análisis. Todo en centavos enteros.
 import type { Base, Fila } from '../data/esquema';
 import { cents, divRound, type Cents, type Ratio } from '../lib/money';
+import { GRUPOS_CONCEPTO } from '../parser/adminprop';
 
 export type { Cents, Ratio };
 export const c = (v: unknown): Cents => (v === '' || v === null || v === undefined || v === 'N/D' ? 0 : cents(v as number));
@@ -75,6 +76,18 @@ export function importeCorrecto(g: Fila, corr: Map<string, Fila>): Cents {
   const k = corr.get(String(g.ID_Gasto));
   return k ? c(k.Importe_Correcto) : c(g.Importe);
 }
+
+/**
+ * Con qué se compara un concepto mes a mes. Cuando la administración junta dos ítems en uno
+ * (mantenimiento propios 80% + comunes 20% desde 11/2026) los tres conceptos tienen el mismo grupo.
+ * Hoja CONCEPTOS, columna Grupo; si está vacía, el de la app; si no hay, el mismo concepto.
+ */
+export function grupo(base: Base, concepto: string): string {
+  return String(base.CONCEPTOS.find((x) => x.Concepto === concepto)?.Grupo || GRUPOS_CONCEPTO[concepto] || concepto);
+}
+
+/** Lo repartido entre los lotes por gastos: columna «Gastos Ord.» + columnas extraordinarias del prorrateo. */
+export const repartidoTotal = (p: Fila | undefined): Cents => c(p?.Repartido) + c(p?.Repartido_Ext);
 
 export function etiqueta(base: Base, concepto: string): string {
   return String(base.CONCEPTOS.find((x) => x.Concepto === concepto)?.Etiqueta || concepto);

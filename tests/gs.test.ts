@@ -161,6 +161,17 @@ describe('Apps Script', () => {
     expect(E.get({ barrio: 'S2' }).sheets.GASTOS.filter((x: { Mes: string }) => x.Mes === '2026-11').length).toBe(1);
   });
 
+  it('carga 11/2026 en una planilla sin las columnas nuevas (sin volver a preparar) y no pierde la cuota extraordinaria', () => {
+    const E = crearEntorno();
+    (E.ctx.prepararPlanilla as () => string)();
+    // planilla vieja: PERIODOS sin Repartido_Ext ni Cuota_Lote_Ext
+    E.hojas.set('PERIODOS', [E.hojas.get('PERIODOS')![0].filter((c) => c !== 'Repartido_Ext' && c !== 'Cuota_Lote_Ext')]);
+    const filas = { PERIODOS: [{ ID_Periodo: 'S2-2026-11', Barrio: 'S2', Mes: '2026-11', Total_Gastos: 100, Repartido: 90, Repartido_Ext: 10, Cuota_Lote_Ext: 1 }] };
+    expect(E.post({ accion: 'cargarLiquidacion', barrio: 'S2', clave: 's2', mes: '2026-11', filas }).ok).toBe(true);
+    const p = E.get({ barrio: 'S2' }).sheets.PERIODOS[0];
+    expect([p.Repartido, p.Repartido_Ext, p.Cuota_Lote_Ext]).toEqual([90, 10, 1]);
+  });
+
   it('guarda comprobantes y archivos solo del propio barrio', () => {
     const E = crearEntorno();
     (E.ctx.prepararPlanilla as () => string)();

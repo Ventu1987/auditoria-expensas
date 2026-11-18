@@ -16,7 +16,7 @@
  *   verificar · subirArchivo · cargarLiquidacion · guardar · borrar · enlace · migrar
  */
 
-var VERSION = '1.1';
+var VERSION = '1.2';
 var ADMIN_CUIT = '20-25787636-6'; // el único CUIT de persona física que se publica (el del administrador)
 var EDITABLES = ['COMPROBANTES', 'CORRECCIONES', 'HALLAZGOS', 'EVENTOS', 'NOTAS', 'MEDIDAS', 'MOVIMIENTOS_BANCO', 'GASTOS', 'CONCEPTOS', 'INDICES', 'BARRIOS', 'EXPENSA_NUEVA', 'EXPENSA_ESTADO'];
 var POR_MES = ['PERIODOS', 'GASTOS', 'FLUJO', 'PAGOS_ANTERIORES', 'PENDIENTES', 'NO_IDENTIFICADOS', 'COEFICIENTES'];
@@ -233,8 +233,18 @@ function migrar_(b) {
 
 // ---------------------------------------------------------------- ayudas de hoja
 
+/** Si el esquema tiene columnas que la hoja todavía no (versión nueva de la app), las agrega al final. Sin esto se perderían esos datos. */
+function asegurarColumnas_(sh) {
+  var def = ESQUEMA[sh.getName()];
+  if (!def) return;
+  var actual = sh.getLastColumn() ? sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0] : [];
+  var faltan = def.columnas.filter(function (c) { return actual.indexOf(c) < 0; });
+  if (faltan.length) sh.getRange(1, actual.length + 1, 1, faltan.length).setValues([faltan]);
+}
+
 function agregar_(sh, filas) {
   if (!filas.length) return;
+  asegurarColumnas_(sh);
   var cab = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
   var v = filas.map(function (f) {
     return cab.map(function (c) {
@@ -261,6 +271,7 @@ function borrarDonde_(sh, cond) {
 
 /** Actualiza por ID (columna id) o agrega. soloNuevas: no pisa filas existentes. */
 function upsert_(sh, filas, id, soloNuevas) {
+  asegurarColumnas_(sh);
   var actuales = leer_(sh);
   var cab = sh.getRange(1, 1, 1, sh.getLastColumn()).getValues()[0];
   var pos = {};

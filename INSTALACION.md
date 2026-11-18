@@ -42,6 +42,13 @@ Si las pruebas fallan, la app no se publica: es a propósito.
 6. **Corregir y comentar:** ajustá la liquidación correcta, el estado de los reclamos y agregá lo que pasó a la cronología.
 7. **Excel** para mandar el libro completo; **PDF** para imprimir una pestaña.
 
+## Actualización de 11/2026 (cuota extraordinaria y mantenimiento en un ítem)
+
+1. En Apps Script, reemplazá `Code.gs` y `Esquema.gs` por los nuevos y publicá una **versión nueva** de la implementación. Las columnas nuevas (`PERIODOS.Repartido_Ext`, `PERIODOS.Cuota_Lote_Ext`, `CONCEPTOS.Grupo`) se agregan solas al guardar; si querés, ejecutá **prepararPlanilla** para verlas ya.
+2. Cuando se publique la app nueva, **volvé a cargar el PDF de noviembre** (Cargar expensa → «Confirmar y reemplazar el mes»): lo cargado con la versión anterior tiene mal leída la columna «Gastos Extraord.».
+3. Revisá en esa carga que el control **«Repartido (Gastos Ord. + Extraord. del prorrateo) = total de gastos»** esté en verde, que el mantenimiento diga *Mantenimiento Fideicomiso (propios + comunes)* y que la cuota de las cámaras diga *Cámaras de seguridad - cuota extraordinaria*.
+4. Si cargaste comprobantes o correcciones para gastos de noviembre antes de recargar, verificá que sigan apuntando al gasto correcto (el ID de cada gasto sale de su posición en el PDF).
+
 ## Problemas comunes
 
 | Pasa | Qué hacer |

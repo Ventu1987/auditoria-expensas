@@ -52,6 +52,7 @@ const V = (A: Analisis) => A.meses.map(mesCorto);
 export function pestanaResumen(A: Analisis): Pestana {
   const R = A.resumen;
   const cols = V(A);
+  const hayExt = R.repartidoExt.some(Boolean) || R.gastoExt.some(Boolean) || R.cuotaExt.some(Boolean);
   const t1: TablaT = {
     id: 'resumen',
     titulo: `${A.nombre} · de los gastos a la expensa, mes a mes`,
@@ -66,26 +67,39 @@ export function pestanaResumen(A: Analisis): Pestana {
       { texto: 'Total de gastos informado en la liquidación', fuente: 'liquidación de RyM: «Total de gastos»', valores: R.gastoInformado, formato: 'money' },
       { texto: 'Control: suma de rubros menos lo informado', fuente: 'total de gastos − informado (tiene que dar 0)', valores: R.controlGasto, formato: 'money', estilo: 'ok', celdas: R.controlGasto.map((v) => (v ? 'mas' : undefined)) },
       sec('De los gastos a la cuota'),
-      { texto: 'Total repartido entre los lotes (informado)', fuente: 'liquidación: prorrateo, total «Gastos Ord.»', valores: R.repartido, formato: 'money', variacion: true },
-      { texto: 'Repartido menos gastado', fuente: 'repartido − total de gastos', valores: R.repartidoMenosGasto, formato: 'money', celdas: R.repartidoMenosGasto.map((v) => (v !== null && Math.abs(v) >= 100000 ? 'mas' : undefined)) },
+      ...(hayExt
+        ? [
+            { texto: 'Repartido como gasto ordinario', fuente: 'liquidación: prorrateo, total «Gastos Ord.»', valores: R.repartido, formato: 'money' as const, variacion: true },
+            { texto: 'Repartido como gasto extraordinario (cuotas extraordinarias)', fuente: 'liquidación: prorrateo, total «Gastos Extraord.»', valores: R.repartidoExt, formato: 'money' as const, estilo: 'rev' as const },
+            { texto: 'De los gastos del mes, los extraordinarios', fuente: 'suma de la columna «Gastos Extraord.» de cada gasto', valores: R.gastoExt, formato: 'money' as const, estilo: 'gris' as const },
+          ]
+        : []),
+      { texto: 'Total repartido entre los lotes (informado)', fuente: hayExt ? 'liquidación: prorrateo, «Gastos Ord.» + «Gastos Extraord.»' : 'liquidación: prorrateo, total «Gastos Ord.»', valores: R.repartidoTotal, formato: 'money', variacion: true },
+      { texto: 'Repartido menos gastado', fuente: 'repartido (ord. + extraord.) − total de gastos (las deudas e intereses no entran)', valores: R.repartidoMenosGasto, formato: 'money', celdas: R.repartidoMenosGasto.map((v) => (v !== null && Math.abs(v) >= 100000 ? 'mas' : undefined)) },
       { texto: 'Cuota del lote común (informada)', fuente: 'liquidación: cupón del lote común', valores: R.cuota, formato: 'money', estilo: 'negrita', variacion: true },
-      { texto: 'Coeficiente del lote común (cuota ÷ repartido)', fuente: 'cuota ÷ repartido', valores: R.coefPct, formato: 'pct4' },
+      ...(hayExt
+        ? [
+            { texto: 'Cuota extraordinaria del lote común', fuente: 'liquidación: cupón o prorrateo, columna «Gastos Extraord.»', valores: R.cuotaExt, formato: 'money' as const, estilo: 'rev' as const },
+            { texto: 'Cuota total del lote común (ordinaria + extraordinaria)', fuente: 'cuota + cuota extraordinaria', valores: R.cuotaTotal, formato: 'money' as const, estilo: 'negrita' as const, variacion: true },
+          ]
+        : []),
+      { texto: 'Coeficiente del lote común (cuota ÷ repartido)', fuente: 'cuota ordinaria ÷ repartido ordinario', valores: R.coefPct, formato: 'pct4' },
       ...(R.reducida.some((v) => v !== null)
         ? [
             { texto: 'Cuota del lote de coeficiente reducido (implícita)', fuente: 'repartido − (lotes − 1) × cuota común', valores: R.reducida, formato: 'money' as const, variacion: true },
             { texto: 'Lote reducido ÷ lote común', fuente: 'cuota reducida ÷ cuota común', valores: R.relReducida, formato: 'num4' as const },
           ]
         : []),
-      { texto: 'Cuota si se repartiera el gasto real (gasto × coeficiente)', fuente: 'total de gastos × coeficiente', valores: R.cuotaGastoReal, formato: 'money' },
+      { texto: 'Cuota si se repartiera el gasto real (gasto × coeficiente)', fuente: hayExt ? 'total de gastos (ord. + extraord.) × coeficiente: comparar con la cuota total' : 'total de gastos × coeficiente', valores: R.cuotaGastoReal, formato: 'money' },
       { texto: 'Cargos particulares (solo algunos lotes)', fuente: 'liquidación: prorrateo, columna «Part.»', valores: R.particulares, formato: 'money', estilo: 'rev', variacion: true },
-      { texto: 'Total de expensas emitidas (repartido + particulares)', fuente: 'repartido + particulares', valores: R.totalCalculado, formato: 'money', estilo: 'negrita' },
+      { texto: 'Total de expensas emitidas (repartido + particulares)', fuente: 'repartido (ord. + extraord.) + particulares', valores: R.totalCalculado, formato: 'money', estilo: 'negrita' },
       { texto: 'Total de expensas informado', fuente: 'liquidación: «Expensas y otros conceptos a cobrar»', valores: R.totalInformado, formato: 'money' },
       { texto: 'Control: calculado menos informado', fuente: 'emitidas − informado (tiene que dar 0)', valores: R.controlTotal, formato: 'money', estilo: 'ok', celdas: R.controlTotal.map((v) => (v ? 'rev' : undefined)) },
-      { texto: 'Lo que cobra el administrador por mes (expensa ordinaria)', fuente: 'igual al repartido entre todos los lotes', valores: R.cobradoOrdinario, formato: 'money', estilo: 'total', variacion: true },
+      { texto: hayExt ? 'Lo que cobra el administrador por mes por gastos (ordinarios + extraordinarios)' : 'Lo que cobra el administrador por mes (expensa ordinaria)', fuente: 'igual al repartido entre todos los lotes', valores: R.cobradoOrdinario, formato: 'money', estilo: 'total', variacion: true },
       sec('Expensa correcta (con el comprobante de cada gasto)'),
       { texto: 'Gasto correcto del mes', fuente: 'suma de la liquidación correcta de cada rubro', valores: R.gastoCorrecto, formato: 'money', estilo: 'negrita' },
       { texto: 'Cuota correcta del lote común', fuente: 'gasto correcto × coeficiente', valores: R.cuotaCorrecta, formato: 'money', estilo: 'ok' },
-      { texto: 'Se cobró de más por lote común', fuente: 'cuota informada − cuota correcta', valores: R.deMasLote, formato: 'money', estilo: 'mas' },
+      { texto: 'Se cobró de más por lote común', fuente: hayExt ? 'cuota informada (ord. + extraord.) − cuota correcta' : 'cuota informada − cuota correcta', valores: R.deMasLote, formato: 'money', estilo: 'mas' },
       { texto: 'En %', fuente: 'de más ÷ cuota informada', valores: R.deMasPct, formato: 'pct' },
       { texto: 'Se cobró de más a todo el barrio (repartido − gasto correcto)', fuente: 'repartido − gasto correcto', valores: R.deMasBarrio, formato: 'money', estilo: 'mas' },
     ],
@@ -214,7 +228,7 @@ export function pestanaAcumulado(A: Analisis): Pestana {
     sec('Gasto y cuota: liquidado contra correcto'),
     { texto: 'Gasto liquidado', fuente: 'Resumen: total de gastos', valores: X.gastoLiquidado, formato: 'money' },
     { texto: 'Gasto correcto (igual al liquidado en los meses sin liquidación correcta)', fuente: 'Resumen: gasto correcto', valores: X.gastoCorrecto, formato: 'money', estilo: 'negrita', celdas: X.corregido.map((v) => (v ? undefined : 'gris')) },
-    { texto: 'Cuota liquidada del lote común', fuente: 'Resumen: cuota informada', valores: X.cuotaLiquidada, formato: 'money' },
+    { texto: 'Cuota liquidada del lote común', fuente: X.cuotaExt.some(Boolean) ? 'Resumen: cuota informada, ordinaria + extraordinaria' : 'Resumen: cuota informada', valores: X.cuotaLiquidada, formato: 'money' },
     { texto: 'Cuota correcta del lote común', fuente: 'gasto correcto × coeficiente', valores: X.cuotaCorrecta, formato: 'money', estilo: 'ok' },
     { texto: 'Pagado de más por el lote común', fuente: 'cuota liquidada − cuota correcta', valores: X.deMasLote, formato: 'money', estilo: 'mas' },
     { texto: 'Acumulado del lote común', fuente: 'suma, desde el primer mes, de la fila anterior', valores: X.acumLote, formato: 'money', estilo: 'negrita' },
@@ -236,8 +250,8 @@ export function pestanaAcumulado(A: Analisis): Pestana {
       formatos: ['money'],
       ancho: 64,
       filas: [
-        { texto: 'Cuota liquidada × 12', fuente: 'cuota liquidada del último mes × 12', valores: [P.cuotaLiquidada12] },
-        { texto: 'Cuota correcta × 12', fuente: 'cuota correcta del último mes × 12', valores: [P.cuotaCorrecta12] },
+        { texto: 'Cuota liquidada × 12', fuente: 'cuota ordinaria liquidada del último mes × 12 (sin cuotas extraordinarias)', valores: [P.cuotaLiquidada12] },
+        { texto: 'Cuota correcta × 12', fuente: 'cuota correcta del último mes, sin los gastos extraordinarios, × 12', valores: [P.cuotaCorrecta12] },
         { texto: 'Pagado de más en un año por el lote común (todo el mes)', fuente: 'diferencia de las dos filas de arriba', valores: [P.deMas12], estilo: 'mas' },
         { texto: 'Gastos que no se repiten (obras y equipos), que se excluyen', fuente: 'obras y equipos corregidos en el último mes', valores: [P.unaVez], estilo: 'gris' },
         { texto: 'Pagado de más en un año por el lote común (solo lo que se repite)', fuente: '(de más del barrio − previsión − obras) × coeficiente × 12', valores: [P.recurrenteLote12], estilo: 'mas' },
@@ -422,7 +436,7 @@ export function pestanaConsolidado(base: Parameters<typeof consolidado>[0]): Pes
     })),
     { texto: 'Total de gastos (suma)', fuente: 'suma de los conceptos de arriba', valores: C.gastoSuma, formato: 'money', estilo: 'total' },
     { texto: 'Total de gastos informado', fuente: 'liquidación de cada barrio', valores: C.gastoInformado, formato: 'money' },
-    { texto: 'Total repartido entre los lotes', fuente: 'liquidación de cada barrio: prorrateo', valores: C.repartido, formato: 'money' },
+    { texto: 'Total repartido entre los lotes', fuente: 'liquidación de cada barrio: prorrateo, «Gastos Ord.» + «Gastos Extraord.»', valores: C.repartido, formato: 'money' },
     { texto: 'Cantidad de lotes', fuente: 'prorrateo de cada barrio', valores: C.lotes, formato: 'num' },
     { texto: 'Gasto por lote', fuente: 'total de gastos ÷ cantidad de lotes', valores: C.gastoPorLote, formato: 'money', estilo: 'negrita' },
     { texto: 'Cuota del lote común (informada)', fuente: 'liquidación: cupón del lote común', valores: C.cuota, formato: 'money' },
