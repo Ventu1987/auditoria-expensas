@@ -308,7 +308,14 @@ export function ExpensaNueva() {
           <p className="en-kicker">
             {E.nombre} · Expensa de {mesLargo(E.mes)} · lote común
           </p>
-          <p className="en-cuota">{pesos(E.cuota)}</p>
+          <p className="en-cuota">{pesos(E.cuotaTotal)}</p>
+          {E.cuotaExt > 0 && (
+            <p className="en-sub">
+              Cuota ordinaria {pesos(E.cuota)} + cuota extraordinaria {pesos(E.cuotaExt)}
+              {E.rubros.flatMap((r) => r.lineas).filter((l) => l.extraordinario).length ? ` (${E.rubros.flatMap((r) => r.lineas).filter((l) => l.extraordinario).map((l) => l.etiqueta.toLowerCase()).join(', ')})` : ''}.
+              {' '}La comparación con el mes anterior es de la cuota ordinaria.
+            </p>
+          )}
           <p className="en-sub">
             {E.vencimiento && <>Vence el {fechaLarga(E.vencimiento)}{E.recargo ? `; después, ${pct(E.recargo)} de recargo` : ''}. </>}
             {difCuota !== null && (
@@ -318,9 +325,9 @@ export function ExpensaNueva() {
               </>
             )}
           </p>
-          {E.cuotaCorrecta !== null && E.cuotaCorrecta !== E.cuota && (
+          {E.cuotaCorrecta !== null && E.cuotaCorrecta !== E.cuotaTotal && (
             <p className="en-correcta">
-              Según la revisión de los comprobantes, correspondería {pesos(E.cuotaCorrecta)} ({conSigno(E.cuotaCorrecta - E.cuota)}).
+              Según la revisión de los comprobantes, correspondería {pesos(E.cuotaCorrecta)} ({conSigno(E.cuotaCorrecta - E.cuotaTotal)}).
             </p>
           )}
           {E.reducida !== null && (
@@ -382,7 +389,7 @@ export function ExpensaNueva() {
         <div className="en-total">
           <div>
             <strong>Total de gastos del mes</strong>
-            {E.totalAnterior !== null && <div className="xs muted">Mes anterior: {pesos(E.totalAnterior)} ({pct((E.totalGastos - E.totalAnterior) / E.totalAnterior, true)})</div>}
+            {!!E.totalAnterior && <div className="xs muted">Mes anterior: {pesos(E.totalAnterior)} ({pct((E.totalGastos - E.totalAnterior) / E.totalAnterior, true)})</div>}
           </div>
           <div className="en-num">
             {pesos(E.totalGastos)}
@@ -395,7 +402,8 @@ export function ExpensaNueva() {
       <section className="card">
         <h2>Cómo se reparte entre los lotes</h2>
         <p>
-          El gasto del mes se divide entre los {E.unidades ?? 'N/D'} lotes según su coeficiente. Cada lote común paga el {pct(E.coefPct)} del total repartido ({pesos(E.repartido)}): {pesos(E.cuota)}.
+          El gasto del mes se divide entre los {E.unidades ?? 'N/D'} lotes según su coeficiente. Cada lote común paga el {pct(E.coefPct)} del total repartido ({pesos(E.repartidoOrd)}): {pesos(E.cuota)}.
+          {E.repartidoExt > 0 && <> Además se reparten {pesos(E.repartidoExt)} de gastos extraordinarios: {pesos(E.cuotaExt)} por lote común.</>}
           {E.reducida !== null && E.reducidaCoef && <> El lote de coeficiente reducido paga el {Math.round(E.reducidaCoef * 100)}% de un lote común: {pesos(E.reducida)}.</>}
         </p>
         {E.repartido - E.totalGastos > 100000 && (

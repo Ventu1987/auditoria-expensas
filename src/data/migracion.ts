@@ -3,7 +3,7 @@
 // cronología, notas y medidas de ahorro (scripts/semilla/semilla.json).
 
 import { baseVacia, type Base, type Fila } from './esquema';
-import { REGLAS_CONCEPTO } from '../parser/adminprop';
+import { GRUPO_MANTENIMIENTO, REGLAS_CONCEPTO } from '../parser/adminprop';
 import { limpiarBase } from './privacidad';
 import { QUE_ES } from '../motor/expensaNueva';
 import semilla from '../../scripts/semilla/semilla.json';
@@ -113,8 +113,8 @@ export function migrar(vieja: Vieja, privados: string[] = []): Base {
     const ep = (re: RegExp) => n(saldo(id, 'ESTADO_PATRIMONIAL', re)?.Importe);
     B.PERIODOS.push({
       ID_Periodo: id, Barrio: bar, Mes: s(p.Mes), Fecha_Vencimiento: s(p.Fecha_Vencimiento), Recargo: s(p.Recargo_Vencimiento), Fecha_Cierre: s(p.Fecha_Cierre),
-      Total_Gastos: n(p.Total_Gastos_Periodo), Repartido: n(p.Base_Prorrateo_Ord), Gastos_Particulares: n(p.Gastos_Particulares), Total_Expensas: n(p.Total_Expensas),
-      Total_Con_Deudas: n(p.Total_Liquidado_Con_Deudas), Cuota_Lote_Comun: n(p.Expensa_Ord_Lote_Tipo), Cuota_Lote_Reducido: reducida, Unidades: n(p.Cantidad_Unidades),
+      Total_Gastos: n(p.Total_Gastos_Periodo), Repartido: n(p.Base_Prorrateo_Ord), Repartido_Ext: 0, Gastos_Particulares: n(p.Gastos_Particulares), Total_Expensas: n(p.Total_Expensas),
+      Total_Con_Deudas: n(p.Total_Liquidado_Con_Deudas), Cuota_Lote_Comun: n(p.Expensa_Ord_Lote_Tipo), Cuota_Lote_Ext: 0, Cuota_Lote_Reducido: reducida, Unidades: n(p.Cantidad_Unidades),
       Unidades_Con_Deuda: n(p.Unidades_Con_Deuda), Lotes_Con_Particulares: '', Saldo_Inicial: n(p.Saldo_Inicial), Ingresos: n(p.Ingresos), Egresos: n(p.Egresos_Caja),
       Saldo_Final: n(p.Saldo_Final), Fondo_Ord_Inicial: n(fondos(id, 'ORDINARIO').Saldo_Inicial), Fondo_Ord_Final: n(fondos(id, 'ORDINARIO').Saldo_Final_Documento),
       Fondo_Ext_Inicial: n(fondos(id, 'EXTRAORDINARIO').Saldo_Inicial), Fondo_Ext_Final: n(fondos(id, 'EXTRAORDINARIO').Saldo_Final_Documento),
@@ -210,7 +210,10 @@ export function migrar(vieja: Vieja, privados: string[] = []): Base {
   B.NOTAS.push(...sem.notas, ...NOTAS_GENERALES);
   B.MEDIDAS.push(...MEDIDAS_S2);
   const etiquetas = new Map((V.CONCEPTOS ?? []).map((c) => [s(c.Concepto_Normalizado), s(c.Etiqueta)]));
-  B.CONCEPTOS.push(...REGLAS_CONCEPTO.map((r, i) => ({ Concepto: r.concepto, Etiqueta: etiquetas.get(r.concepto) ?? r.concepto, Patron: r.patron, Orden: i + 1, Que_Es: QUE_ES[r.concepto] ?? '' })));
+  const ETIQUETAS_NUEVAS: Record<string, string> = { [GRUPO_MANTENIMIENTO]: 'Mantenimiento del Fideicomiso', 'Cámaras de seguridad - cuota extraordinaria': 'Cámaras: cuota extraordinaria' };
+  B.CONCEPTOS.push(
+    ...REGLAS_CONCEPTO.map((r) => ({ Concepto: r.concepto, Etiqueta: etiquetas.get(r.concepto) ?? ETIQUETAS_NUEVAS[r.concepto] ?? r.concepto, Patron: r.patron, Orden: r.orden ?? '', Que_Es: QUE_ES[r.concepto] ?? '', Grupo: r.grupo ?? '' })),
+  );
   for (const x of V.INDICES ?? []) if (x.IPC_Var_Mensual !== '') B.INDICES.push({ Mes: s(x.Mes), IPC_Var_Mensual: n(x.IPC_Var_Mensual), Fuente: s(x.Fuente) });
 
   return limpiarBase(B, privados);

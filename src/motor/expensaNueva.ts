@@ -1,7 +1,8 @@
 // Expensa nueva para los propietarios: lo que liquidó la administración, explicado concepto por concepto,
 // con la variación contra el mes anterior, lo que correspondería según la revisión y el flujo de caja en palabras simples.
 import type { Base, Fila } from '../data/esquema';
-import { c, contexto, correcciones, etiqueta, hay, importeCorrecto, mesesCorregidos, prorr, sum, type Cents } from './base';
+import { c, contexto, correcciones, etiqueta, grupo, hay, importeCorrecto, mesesCorregidos, prorr, repartidoTotal, sum, type Cents } from './base';
+import { GRUPO_MANTENIMIENTO } from '../parser/adminprop';
 import { nombreRubro } from './resumen';
 import { matriz, TIPOS_RESPALDO } from './analisis';
 
@@ -13,6 +14,8 @@ export const QUE_ES: Record<string, string> = {
   'Bidones de agua garita': 'Agua para la garita de la guardia.',
   'Mantenimiento Fideicomiso - espacios propios 80%': 'La parte que le toca al barrio del mantenimiento que hace el Fideicomiso (personal y gastos) en los espacios del barrio.',
   'Mantenimiento Fideicomiso - espacios comunes 20%': 'La parte que le toca al barrio del mantenimiento de los espacios comunes de todo el predio.',
+  [GRUPO_MANTENIMIENTO]: 'La parte que le toca al barrio del mantenimiento que hace el Fideicomiso (personal y gastos): los espacios del barrio y los espacios comunes del predio. Hasta octubre de 2026 venía en dos ítems (80% y 20%).',
+  'Cámaras de seguridad - cuota extraordinaria': 'Cuota extraordinaria para pagar la instalación de las cámaras de seguridad a la empresa de seguridad. Se cobra aparte de la expensa ordinaria y no se repite cuando termina el plan de pago.',
   'Caja chica Fideicomiso': 'La parte del barrio en gastos menores del Fideicomiso: combustible, ferretería, reparaciones.',
   'Control de plagas / desratización': 'Control de plagas y desratización del perímetro, los lotes en obra y la entrada.',
   'Reparación - control remoto (materiales + M.O.)': 'Reparación del control remoto del portón (materiales y mano de obra).',
@@ -46,6 +49,10 @@ export interface LineaExpensa {
   respaldo: number;
   respaldoTexto: string;
   estimado: boolean;
+  /** parte del gasto que va en la columna «Gastos Extraord.» */
+  extraordinario: Cents;
+  /** el mes anterior se comparó contra otros ítems del mismo grupo (se juntaron o separaron) */
+  comparadoConGrupo: boolean;
   ahorrable: boolean;
   ahorro: Cents | null;
   notaAhorro: string;
@@ -78,10 +85,12 @@ export function idLinea(barrio: string, mes: string, concepto: string) {
 function explicar(l: Omit<LineaExpensa, 'explicacion' | 'explicacionAuto'>, aclaracion: string | undefined, detalleCorr: string): string {
   const partes: string[] = [];
   if (l.anterior === null) partes.push('Gasto nuevo este mes.');
+  else if (l.comparadoConGrupo) partes.push('Antes venía en varios ítems: se compara con la suma de esos ítems del mes anterior.');
   else if (l.variacion === 0) partes.push('Igual que el mes anterior.');
   else if (l.variacionPct !== null) partes.push(`${l.variacion! > 0 ? 'Sube' : 'Baja'} ${pct(l.variacionPct)} respecto del mes anterior (${l.variacion! > 0 ? '+' : ''}${pesos(l.variacion!)}).`);
   if (aclaracion) partes.push(aclaracion);
   if (l.estimado) partes.push('Es un importe estimado: todavía no está la factura.');
+  if (l.extraordinario) partes.push(l.extraordinario === l.actual ? 'Se cobra como cuota extraordinaria, aparte de la expensa ordinaria.' : `De este importe, ${pesos(l.extraordinario)} se cobran como cuota extraordinaria.`);
   if (l.correcto !== null && l.correcto !== l.actual) partes.push(`Según la revisión correspondían ${pesos(l.correcto)}${detalleCorr ? `: ${detalleCorr.replace(/\.$/, '')}` : ''}.`);
   return partes.join(' ');
 }
@@ -108,7 +117,11 @@ export function expensaNueva(base: Base, barrio: string, mes: string) {
     const conceptos = [...new Set(gs.map((g) => String(g.Concepto)))];
     const lineas = conceptos.map((k): LineaExpensa => {
       const de = gs.filter((g) => g.Concepto === k);
-      const deAnt = gastosAnt.filter((g) => g.Concepto === k);
+      // contra el mismo concepto; si no estaba, contra su grupo (mantenimiento propios + comunes → un ítem desde 11/2026)
+      const mismo = gastosAnt.filter((g) => g.Concepto === k);
+      const gk = grupo(base, k);
+      const delGrupo = mismo.length ? [] : gastosAnt.filter((g) => grupo(base, String(g.Concepto)) === gk && !gastos.some((x) => x.Concepto === g.Concepto));
+      const deAnt = mismo.length ? mismo : delGrupo;
       const actual = sum(de.map((g) => c(g.Importe)));
       const anterior = deAnt.length ? sum(deAnt.map((g) => c(g.Importe))) : null;
       const correcto = hayCorr ? sum(de.map((g) => importeCorrecto(g, corr))) : null;
@@ -131,6 +144,8 @@ export function expensaNueva(base: Base, barrio: string, mes: string) {
         respaldo: resp,
         respaldoTexto: TIPOS_RESPALDO[resp]?.nombre.replace(/^\d · /, '') ?? '',
         estimado: de.some((g) => g.Es_Estimado === 'SI' || g.Es_Provisorio === 'SI'),
+        extraordinario: sum(de.map((g) => c(g.Otras_Columnas))),
+        comparadoConGrupo: !mismo.length && delGrupo.length > 0,
         ahorrable: n?.Ahorrable === 'SI',
         ahorro: n && hay(n.Ahorro_Estimado) ? c(n.Ahorro_Estimado) : null,
         notaAhorro: String(n?.Nota_Ahorro ?? ''),
@@ -156,10 +171,15 @@ export function expensaNueva(base: Base, barrio: string, mes: string) {
   const coef = ctx.coef(mes);
   const cuota = c(P.Cuota_Lote_Comun);
   const cuotaAnt = Pa ? c(Pa.Cuota_Lote_Comun) : null;
+  // la cuota correcta reparte todo el gasto (ordinario + extraordinario)
   const cuotaCorrecta = totalCorrecto === null ? null : prorr(totalCorrecto, coef.num, coef.den);
-  const repartido = c(P.Repartido);
+  const repartidoOrd = c(P.Repartido);
+  const repartidoExt = c(P.Repartido_Ext);
+  const repartido = repartidoTotal(P);
+  const cuotaExt = hay(P.Cuota_Lote_Ext) && c(P.Cuota_Lote_Ext) ? c(P.Cuota_Lote_Ext) : repartidoExt ? prorr(repartidoExt, coef.num, coef.den) : 0;
+  const cuotaExtAnt = Pa ? c(Pa.Cuota_Lote_Ext) : null;
   const reducidaCoef = Number(ctx.barrioFila?.Coef_Lote_Reducido || 0);
-  const reducida = hay(P.Cuota_Lote_Reducido) ? c(P.Cuota_Lote_Reducido) : reducidaCoef ? repartido - (Number(P.Unidades) - 1) * cuota : null;
+  const reducida = hay(P.Cuota_Lote_Reducido) ? c(P.Cuota_Lote_Reducido) : reducidaCoef ? repartidoOrd - (Number(P.Unidades) - 1) * cuota : null;
 
   // la razón principal de la variación de la cuota: el concepto que más cambió en pesos
   const cambios = rubros.flatMap((r) => r.lineas).map((l) => ({ l, d: l.variacion ?? l.actual }));
@@ -224,6 +244,11 @@ export function expensaNueva(base: Base, barrio: string, mes: string) {
     recargo: Number(P.Recargo) || null,
     cuota,
     cuotaAnt,
+    /** cuota extraordinaria del lote común (0 si no hay) */
+    cuotaExt,
+    cuotaExtAnt,
+    /** lo que paga el lote común por los gastos del mes: ordinaria + extraordinaria */
+    cuotaTotal: cuota + cuotaExt,
     cuotaCorrecta,
     reducida,
     reducidaCoef: reducidaCoef || null,
@@ -231,7 +256,9 @@ export function expensaNueva(base: Base, barrio: string, mes: string) {
     particulares: c(P.Gastos_Particulares),
     lotesConParticulares: hay(P.Lotes_Con_Particulares) ? Number(P.Lotes_Con_Particulares) : null,
     repartido,
-    coefPct: repartido ? cuota / repartido : null,
+    repartidoOrd,
+    repartidoExt,
+    coefPct: repartidoOrd ? cuota / repartidoOrd : null,
     principal: principal ? { etiqueta: principal.l.etiqueta, variacion: principal.d, nuevo: principal.l.anterior === null } : null,
     rubros,
     totalGastos,

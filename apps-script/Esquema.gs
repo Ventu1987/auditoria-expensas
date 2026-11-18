@@ -22,7 +22,7 @@ var ESQUEMA = {
   "PERIODOS": {
     "id": "ID_Periodo",
     "publica": true,
-    "descripcion": "Una liquidación por fila: totales, saldos, fondos y patrimonio, tal como los informa el PDF.",
+    "descripcion": "Una liquidación por fila: totales, saldos, fondos y patrimonio, tal como los informa el PDF. Repartido: columna «Gastos Ord.» del prorrateo; Repartido_Ext: columnas extraordinarias (cuotas extraordinarias). Lo cobrado por gastos = Repartido + Repartido_Ext.",
     "columnas": [
       "ID_Periodo",
       "Barrio",
@@ -32,10 +32,12 @@ var ESQUEMA = {
       "Fecha_Cierre",
       "Total_Gastos",
       "Repartido",
+      "Repartido_Ext",
       "Gastos_Particulares",
       "Total_Expensas",
       "Total_Con_Deudas",
       "Cuota_Lote_Comun",
+      "Cuota_Lote_Ext",
       "Cuota_Lote_Reducido",
       "Unidades",
       "Unidades_Con_Deuda",
@@ -67,7 +69,7 @@ var ESQUEMA = {
   "GASTOS": {
     "id": "ID_Gasto",
     "publica": true,
-    "descripcion": "Un gasto liquidado por fila. Respaldo_Tipo: 1 completo, 2 parcial, 3 no fiscal, 4 solo citado, 5 nada o estimado.",
+    "descripcion": "Un gasto liquidado por fila. Importe: el gasto completo (ordinario + extraordinario). Otras_Columnas: la parte que va en la columna «Gastos Extraord.». Respaldo_Tipo: 1 completo, 2 parcial, 3 no fiscal, 4 solo citado, 5 nada o estimado.",
     "columnas": [
       "ID_Gasto",
       "Barrio",
@@ -291,13 +293,14 @@ var ESQUEMA = {
   "CONCEPTOS": {
     "id": "Concepto",
     "publica": true,
-    "descripcion": "Conceptos normalizados y el patrón (expresión regular) con el que el lector los reconoce en el PDF. Se evalúan en orden.",
+    "descripcion": "Conceptos normalizados y el patrón (expresión regular) con el que el lector los reconoce en el PDF. Se evalúan en orden. Grupo: con qué se compara mes a mes cuando la administración junta o separa ítems (vacío: el mismo concepto).",
     "columnas": [
       "Concepto",
       "Etiqueta",
       "Patron",
       "Orden",
-      "Que_Es"
+      "Que_Es",
+      "Grupo"
     ]
   },
   "INDICES": {

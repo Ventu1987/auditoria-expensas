@@ -1,5 +1,5 @@
 // Convierte lo leído del PDF en filas de la planilla, con correcciones y novedades sugeridas.
-import type { Extraida, GastoExtraido } from '../parser/adminprop';
+import { GRUPOS_CONCEPTO, type Extraida, type GastoExtraido } from '../parser/adminprop';
 import { baseVacia, type Base, type Fila } from './esquema';
 import { limpiarFila, pareceNombre } from './privacidad';
 import { respaldoSugerido } from '../motor/analisis';
@@ -49,12 +49,15 @@ export function prepararCarga(e: Extraida, barrio: string, base: Base, privados:
     avisos.push('La cuota del lote común se tomó del prorrateo (redondeada al peso). Revisala.');
   }
   const reducida = otros.length === 1 ? e.prorrateo.totales.repartido - comunes.length * cuota : '';
+  // cuota extraordinaria del lote común: la del cupón o, si no está, la del prorrateo
+  const cuotaExt = e.cuotaCuponExt || comunes[0]?.cuotaExt || 0;
+  if (e.prorrateo.totales.repartidoExt && !cuotaExt) avisos.push('Hay gastos extraordinarios repartidos pero no se encontró la cuota extraordinaria del lote común. Revisala.');
   const fallidos = e.controles.filter((x) => !x.ok).map((x) => `${x.control} (diferencia $ ${p(x.documento - x.calculado).toLocaleString('es-AR', { minimumFractionDigits: 2 })})`);
 
   B.PERIODOS.push({
     ID_Periodo: id, Barrio: barrio, Mes: mes, Fecha_Vencimiento: e.fechaVencimiento, Recargo: pctAFraccion(e.recargo), Fecha_Cierre: e.flujo.fechaCierre,
-    Total_Gastos: p(e.totalGastos), Repartido: p(e.prorrateo.totales.repartido), Gastos_Particulares: p(e.prorrateo.totales.particulares), Total_Expensas: p(e.patrimonio.expensasACobrar),
-    Total_Con_Deudas: p(e.prorrateo.totales.total), Cuota_Lote_Comun: p(cuota), Cuota_Lote_Reducido: reducida === '' ? '' : p(reducida), Unidades: e.prorrateo.unidades,
+    Total_Gastos: p(e.totalGastos), Repartido: p(e.prorrateo.totales.repartido), Repartido_Ext: p(e.prorrateo.totales.repartidoExt), Gastos_Particulares: p(e.prorrateo.totales.particulares), Total_Expensas: p(e.patrimonio.expensasACobrar),
+    Total_Con_Deudas: p(e.prorrateo.totales.total), Cuota_Lote_Comun: p(cuota), Cuota_Lote_Ext: p(cuotaExt), Cuota_Lote_Reducido: reducida === '' ? '' : p(reducida), Unidades: e.prorrateo.unidades,
     Unidades_Con_Deuda: e.prorrateo.unidadesConDeuda, Lotes_Con_Particulares: e.prorrateo.lotesConParticulares, Saldo_Inicial: p(e.flujo.saldoAnterior.total), Ingresos: p(e.resumenBanco.ingresos),
     Egresos: p(e.resumenBanco.egresos), Saldo_Final: p(e.flujo.saldoCierre.total), Fondo_Ord_Inicial: p(e.flujo.saldoAnterior.ord), Fondo_Ord_Final: p(e.flujo.saldoCierre.ord),
     Fondo_Ext_Inicial: p(e.flujo.saldoAnterior.ext), Fondo_Ext_Final: p(e.flujo.saldoCierre.ext), Disponibilidades: p(e.patrimonio.disponibilidades), Expensas_A_Cobrar: p(e.patrimonio.expensasACobrar),
@@ -95,23 +98,43 @@ export function prepararCarga(e: Extraida, barrio: string, base: Base, privados:
   e.prorrateo.lotes.forEach((l) => B.COEFICIENTES.push({ ID_Coef: `${id}-L${String(l.lote).padStart(2, '0')}`, Barrio: barrio, Mes: mes, Lote: String(l.lote), Coef_Pct: l.coefPct, Cuota: p(l.cuota) }));
 
   // correcciones sugeridas: se repite el criterio del mes anterior para el mismo concepto
+  // (o para su grupo, cuando la administración juntó ítems: mantenimiento propios + comunes desde 11/2026)
+  const grupoDe = (k: unknown) => {
+    const def = base.CONCEPTOS.find((x) => x.Concepto === k)?.Grupo;
+    return String(def || GRUPOS_CONCEPTO[String(k)] || k);
+  };
   const previas = base.CORRECCIONES.filter((x) => x.Barrio === barrio && x.Estado === 'APLICADA' && String(x.Mes) < mes).sort((a, b) => String(b.Mes).localeCompare(String(a.Mes)));
   for (const g of B.GASTOS) {
     const imp = Number(g.Importe);
-    if (/Obra de c[aá]maras|Equipamiento CCTV/.test(String(g.Concepto)) && imp) {
+    // ya va en la columna extraordinaria: no se cobra en la expensa ordinaria
+    const extraordinario = Number(g.Otras_Columnas) > 0 && Math.abs(Number(g.Otras_Columnas) - imp) < 0.01;
+    if (/Obra de c[aá]maras|Equipamiento CCTV/.test(String(g.Concepto)) && imp && !extraordinario) {
       B.CORRECCIONES.push({ ID_Correccion: `K-${g.ID_Gasto}`, Barrio: barrio, Mes: mes, ID_Gasto: g.ID_Gasto, Concepto: g.Concepto, Importe_Liquidado: imp, Importe_Correcto: 0, Criterio: 'H30', Detalle: 'Obra o compra de equipos: se paga con el fondo extraordinario.', Es_Estimado: 'NO', Estado: 'SUGERIDA', Origen: 'regla' });
       continue;
     }
-    const ant = previas.find((x) => x.Concepto === g.Concepto);
-    if (!ant || imp <= 0) continue;
-    const liqAnt = Number(ant.Importe_Liquidado);
-    const corAnt = Number(ant.Importe_Correcto);
-    const fijo = /abono informado/i.test(String(ant.Detalle));
-    const correcto = fijo ? corAnt : liqAnt ? Math.round(imp * (corAnt / liqAnt) * 100) / 100 : imp;
+    if (imp <= 0) continue;
+    let ant: { Mes: string; Criterio: string; Detalle: string; liq: number; cor: number } | null = null;
+    const mismo = previas.find((x) => x.Concepto === g.Concepto);
+    if (mismo) ant = { Mes: String(mismo.Mes), Criterio: String(mismo.Criterio), Detalle: String(mismo.Detalle), liq: Number(mismo.Importe_Liquidado), cor: Number(mismo.Importe_Correcto) };
+    else {
+      // del grupo: se suman las correcciones del último mes que tenga alguna
+      const grupo = grupoDe(g.Concepto);
+      const delGrupo = previas.filter((x) => grupoDe(x.Concepto) === grupo && x.Concepto !== g.Concepto);
+      const mesG = delGrupo[0]?.Mes;
+      const xs = delGrupo.filter((x) => x.Mes === mesG);
+      if (xs.length)
+        ant = {
+          Mes: String(mesG), Criterio: [...new Set(xs.map((x) => String(x.Criterio)))].join(', '), Detalle: String(xs[0].Detalle),
+          liq: xs.reduce((a, x) => a + Number(x.Importe_Liquidado), 0), cor: xs.reduce((a, x) => a + Number(x.Importe_Correcto), 0),
+        };
+    }
+    if (!ant) continue;
+    const fijo = /abono informado/i.test(ant.Detalle);
+    const correcto = fijo ? ant.cor : ant.liq ? Math.round(imp * (ant.cor / ant.liq) * 100) / 100 : imp;
     if (Math.abs(correcto - imp) < 0.01) continue;
     B.CORRECCIONES.push({
       ID_Correccion: `K-${g.ID_Gasto}`, Barrio: barrio, Mes: mes, ID_Gasto: g.ID_Gasto, Concepto: g.Concepto, Importe_Liquidado: imp, Importe_Correcto: correcto, Criterio: ant.Criterio,
-      Detalle: fijo ? `Mismo importe que ${String(ant.Mes)}: ${String(ant.Detalle)}` : `Mismo porcentaje de corrección que ${String(ant.Mes)} (${Math.round((corAnt / liqAnt) * 10000) / 100}%). Revisar con el comprobante.`,
+      Detalle: fijo ? `Mismo importe que ${ant.Mes}: ${ant.Detalle}` : `Mismo porcentaje de corrección que ${ant.Mes} (${Math.round((ant.cor / ant.liq) * 10000) / 100}%)${mismo ? '' : ', sumando los ítems que ahora vienen juntos'}. Revisar con el comprobante.`,
       Es_Estimado: 'SI', Estado: 'SUGERIDA', Origen: 'regla',
     });
   }
@@ -119,7 +142,7 @@ export function prepararCarga(e: Extraida, barrio: string, base: Base, privados:
   // evento de la liquidación
   B.EVENTOS.push({
     ID_Evento: `${id}-AUTO-VTO`, Barrio: barrio, Fecha: e.fechaVencimiento || `${mes}-28`, Tipo: 'Liquidación',
-    Hecho: `Vence la expensa de ${mes.slice(5)}/${mes.slice(0, 4)}: gastos $ ${p(e.totalGastos).toLocaleString('es-AR', { minimumFractionDigits: 2 })}, cuota del lote común $ ${p(cuota).toLocaleString('es-AR', { minimumFractionDigits: 2 })}.${fallidos.length ? ' El documento no cierra en: ' + fallidos.join('; ') + '.' : ''}`,
+    Hecho: `Vence la expensa de ${mes.slice(5)}/${mes.slice(0, 4)}: gastos $ ${p(e.totalGastos).toLocaleString('es-AR', { minimumFractionDigits: 2 })}, cuota del lote común $ ${p(cuota).toLocaleString('es-AR', { minimumFractionDigits: 2 })}${cuotaExt ? ` + cuota extraordinaria $ ${p(cuotaExt).toLocaleString('es-AR', { minimumFractionDigits: 2 })}` : ''}.${fallidos.length ? ' El documento no cierra en: ' + fallidos.join('; ') + '.' : ''}`,
     Importe: p(e.totalGastos), Ref: '', Origen: 'auto',
   });
 

@@ -1,5 +1,5 @@
 import type { Base, Fila } from '../data/esquema';
-import { c, contexto, correcciones, etiqueta, hay, importeCorrecto, mesesCorregidos, notas, prorr, sum, type Cents, type Ctx } from './base';
+import { c, contexto, correcciones, etiqueta, grupo, hay, importeCorrecto, mesesCorregidos, notas, prorr, repartidoTotal, sum, type Cents, type Ctx } from './base';
 import { detalleRubro, resumen, rubrosDe, type Serie } from './resumen';
 
 // ================================================================ flujo de fondos
@@ -47,7 +47,7 @@ export function flujo(base: Base, barrio: string, ctxIn?: Ctx) {
   const pagadoMes = M.map((_, i) => -(pagos.find((x) => x.clave === 'PAGO_GASTOS')?.serie[i] ?? 0));
   const pendMes = M.map((m) => (hay(P(m).Pendientes_Pago_Mes) ? Math.abs(c(P(m).Pendientes_Pago_Mes)) : null));
   const pendTotal = M.map((m) => (hay(P(m).Saldos_Pendientes_Total) ? c(P(m).Saldos_Pendientes_Total) : null));
-  const repMenosGasto = M.map((m, i) => c(P(m).Repartido) - gasto[i]);
+  const repMenosGasto = M.map((m, i) => repartidoTotal(P(m)) - gasto[i]);
   let acum = 0;
   const repartidoDeMasAcum = repMenosGasto.map((v) => (acum += v));
   // bancos: saldo del último movimiento de cada mes
@@ -104,7 +104,7 @@ export function flujo(base: Base, barrio: string, ctxIn?: Ctx) {
 // ================================================================ acumulado y proyección
 
 /** Conceptos que no se repiten: no entran en la proyección. */
-const UNA_VEZ = /Obra de c[aá]maras|Equipamiento CCTV/;
+const UNA_VEZ = /Obra de c[aá]maras|Equipamiento CCTV|cuota extraordinaria/i;
 
 export function acumulado(base: Base, barrio: string, ctxIn?: Ctx) {
   const ctx = ctxIn ?? contexto(base, barrio);
@@ -113,11 +113,12 @@ export function acumulado(base: Base, barrio: string, ctxIn?: Ctx) {
   const corr = correcciones(ctx);
   const gastoCorrecto = M.map((_, i) => R.gastoCorrecto[i] ?? R.gasto[i]);
   const cuotaCorrecta = M.map((m, i) => prorr(gastoCorrecto[i], ctx.coef(m).num, ctx.coef(m).den));
-  const deMasLote = M.map((_, i) => R.cuota[i] - cuotaCorrecta[i]);
+  // cuota liquidada = ordinaria + extraordinaria (la correcta reparte todo el gasto)
+  const deMasLote = M.map((_, i) => R.cuotaTotal[i] - cuotaCorrecta[i]);
   let a = 0;
   const acumLote = deMasLote.map((v) => (a += v));
   const red = Number(ctx.barrioFila?.Coef_Lote_Reducido || 0);
-  const deMasBarrio = M.map((_, i) => R.repartido[i] - gastoCorrecto[i]);
+  const deMasBarrio = M.map((_, i) => R.repartidoTotal[i] - gastoCorrecto[i]);
   let b = 0;
   const acumBarrio = deMasBarrio.map((v) => (b += v));
   // de dónde sale la diferencia, por rubro
@@ -131,16 +132,19 @@ export function acumulado(base: Base, barrio: string, ctxIn?: Ctx) {
   const unaVez = ult >= 0 ? sum(ctx.gastos(mesU).filter((g) => UNA_VEZ.test(String(g.Concepto))).map((g) => c(g.Importe) - importeCorrecto(g, corr))) : 0;
   const recurrenteBarrio = ult >= 0 ? deMasBarrio[ult] - R.repartidoMenosGasto[ult] - unaVez : 0;
   const recurrenteLote = ult >= 0 ? prorr(recurrenteBarrio, ctx.coef(mesU).num, ctx.coef(mesU).den) : 0;
+  // la proyección a 12 meses es de la cuota ordinaria: las cuotas extraordinarias no se repiten
+  const cuotaCorrectaOrd = ult >= 0 ? prorr(gastoCorrecto[ult] - R.gastoExt[ult], ctx.coef(mesU).num, ctx.coef(mesU).den) : 0;
   return {
     meses: M,
     corregido: R.corregido,
     gastoLiquidado: R.gasto,
     gastoCorrecto,
-    cuotaLiquidada: R.cuota,
+    cuotaLiquidada: R.cuotaTotal,
+    cuotaExt: R.cuotaExt,
     cuotaCorrecta,
     deMasLote,
     acumLote,
-    pct: M.map((_, i) => (R.cuota[i] ? deMasLote[i] / R.cuota[i] : null)),
+    pct: M.map((_, i) => (R.cuotaTotal[i] ? deMasLote[i] / R.cuotaTotal[i] : null)),
     coefReducido: red || null,
     deMasReducido: red ? deMasLote.map((v) => Math.round(v * red)) : null,
     deMasBarrio,
@@ -150,8 +154,8 @@ export function acumulado(base: Base, barrio: string, ctxIn?: Ctx) {
     proyeccion: ult < 0 ? null : {
       mes: mesU,
       cuotaLiquidada12: R.cuota[ult] * 12,
-      cuotaCorrecta12: cuotaCorrecta[ult] * 12,
-      deMas12: (R.cuota[ult] - cuotaCorrecta[ult]) * 12,
+      cuotaCorrecta12: cuotaCorrectaOrd * 12,
+      deMas12: (R.cuota[ult] - cuotaCorrectaOrd) * 12,
       unaVez,
       recurrenteLote12: recurrenteLote * 12,
       recurrenteBarrio12: recurrenteBarrio * 12,
@@ -238,7 +242,8 @@ export function consolidado(base: Base) {
     filas,
     gastoSuma,
     gastoInformado: de('Total_Gastos'),
-    repartido: de('Repartido'),
+    repartido: cols.map((x) => (P(x.barrio, x.mes) ? repartidoTotal(P(x.barrio, x.mes)) : null)),
+    repartidoExt: de('Repartido_Ext'),
     lotes,
     gastoPorLote: cols.map((_, i) => (lotes[i] ? Math.round(gastoSuma[i] / lotes[i]!) : null)),
     cuota: de('Cuota_Lote_Comun'),
@@ -386,14 +391,20 @@ export function novedades(base: Base, barrio: string, mes: string, ctxIn?: Ctx):
   if (i < 0) return [];
   const ant = i > 0 ? ctx.meses[i - 1] : null;
   const out: Novedad[] = [];
+  // se compara por grupo: si la administración junta dos ítems en uno (mantenimiento propios + comunes
+  // desde 11/2026) no aparece como «cargo nuevo» + «no figura», sino como la variación del total
+  const gr = (k: string) => grupo(base, k);
   const porConcepto = (m: string) => {
     const r = new Map<string, Cents>();
-    for (const g of ctx.gastos(m)) r.set(String(g.Concepto), (r.get(String(g.Concepto)) ?? 0) + c(g.Importe));
+    for (const g of ctx.gastos(m)) r.set(gr(String(g.Concepto)), (r.get(gr(String(g.Concepto))) ?? 0) + c(g.Importe));
     return r;
   };
+  const rubrosDeGrupo = (m: string, k: string) => [...new Set(ctx.gastos(m).filter((g) => gr(String(g.Concepto)) === k).map((g) => Number(g.Rubro_Num)))].sort((a, b) => a - b);
+  const conceptosDeGrupo = (m: string, k: string) => new Set(ctx.gastos(m).filter((g) => gr(String(g.Concepto)) === k).map((g) => String(g.Concepto)));
   const hoy = porConcepto(mes);
   const antes = ant ? porConcepto(ant) : new Map<string, Cents>();
   let cuota: Novedad | null = null;
+  const cuotaExt: Novedad[] = [];
   if (ant) {
     for (const [k, v] of hoy) {
       const e = etiqueta(base, k);
@@ -401,27 +412,41 @@ export function novedades(base: Base, barrio: string, mes: string, ctxIn?: Ctx):
       else {
         const a = antes.get(k)!;
         const d = a ? (v - a) / Math.abs(a) : 0;
-        if (Math.abs(d) >= 0.1 && Math.abs(v - a) >= 5000000) out.push({ tipo: d > 0 ? 'aumento' : 'baja', texto: `${e}: ${d > 0 ? 'sube' : 'baja'} ${pct1(Math.abs(d))} respecto del mes anterior`, importe: v - a, clave: k });
-        if (v === a && POR_CONSUMO.test(k) && ctx.gastos(mes).some((g) => g.Concepto === k && (g.Es_Estimado === 'SI' || g.Es_Provisorio === 'SI')))
+        const cAnt = conceptosDeGrupo(ant, k);
+        const cHoy = conceptosDeGrupo(mes, k);
+        const junto = cAnt.size !== cHoy.size || [...cHoy].some((x) => !cAnt.has(x));
+        const rA = rubrosDeGrupo(ant, k).join(', ');
+        const rH = rubrosDeGrupo(mes, k).join(', ');
+        const forma = [junto ? `antes en ${cAnt.size} ítem(s), ahora en ${cHoy.size}` : '', rA !== rH ? `pasó del rubro ${rA} al ${rH}` : ''].filter(Boolean).join('; ');
+        if (Math.abs(d) >= 0.1 && Math.abs(v - a) >= 5000000)
+          out.push({ tipo: d > 0 ? 'aumento' : 'baja', texto: `${e}: ${d > 0 ? 'sube' : 'baja'} ${pct1(Math.abs(d))} respecto del mes anterior${forma ? ` (${forma})` : ''}`, importe: v - a, clave: k });
+        else if (forma) out.push({ tipo: 'reparto', texto: `${e}: cambia la forma en que se liquida (${forma}). Se compara el total: ${v >= a ? 'sube' : 'baja'} ${pct1(Math.abs(d))}`, importe: v - a, clave: `${k}#forma` });
+        if (v === a && POR_CONSUMO.test(k) && ctx.gastos(mes).some((g) => gr(String(g.Concepto)) === k && (g.Es_Estimado === 'SI' || g.Es_Provisorio === 'SI')))
           out.push({ tipo: 'repetido', texto: `${e}: mismo importe exacto que el mes anterior, y provisorio`, importe: v, clave: k });
       }
     }
     for (const [k, v] of antes) if (!hoy.has(k)) out.push({ tipo: 'falta', texto: `No figura este mes: ${etiqueta(base, k)}`, importe: -v, clave: k });
     const c0 = c(ctx.periodo(ant)!.Cuota_Lote_Comun);
     const c1 = c(ctx.periodo(mes)!.Cuota_Lote_Comun);
-    if (c0) cuota = { tipo: 'cuota', texto: `Cuota del lote común: ${c1 >= c0 ? 'sube' : 'baja'} ${pct1(Math.abs((c1 - c0) / c0))} respecto del mes anterior`, importe: c1 - c0, clave: 'CUOTA' };
+    if (c0) cuota = { tipo: 'cuota', texto: `Cuota ordinaria del lote común: ${c1 >= c0 ? 'sube' : 'baja'} ${pct1(Math.abs((c1 - c0) / c0))} respecto del mes anterior`, importe: c1 - c0, clave: 'CUOTA' };
+    const e0 = c(ctx.periodo(ant)!.Cuota_Lote_Ext);
+    const e1 = c(ctx.periodo(mes)!.Cuota_Lote_Ext);
+    if (e1 && !e0) cuotaExt.push({ tipo: 'cuota', texto: 'Además de la cuota ordinaria, este mes hay una cuota extraordinaria por lote común', importe: e1, clave: 'CUOTA_EXT' });
+    else if (e0 && !e1) cuotaExt.push({ tipo: 'cuota', texto: 'Este mes ya no hay cuota extraordinaria', importe: -e0, clave: 'CUOTA_EXT' });
+    else if (e1 && e0 !== e1) cuotaExt.push({ tipo: 'cuota', texto: `Cuota extraordinaria del lote común: ${e1 >= e0 ? 'sube' : 'baja'} ${pct1(Math.abs((e1 - e0) / e0))}`, importe: e1 - e0, clave: 'CUOTA_EXT' });
   }
   for (const g of ctx.gastos(mes)) {
     if (g.Es_Estimado !== 'SI' && g.Es_Provisorio !== 'SI') continue;
     const k = String(g.Concepto);
     // un abono estimado con el mismo importe que el mes anterior no es novedad
-    if (antes.get(k) === hoy.get(k) && !POR_CONSUMO.test(k)) continue;
+    if (antes.get(gr(k)) === hoy.get(gr(k)) && !POR_CONSUMO.test(k)) continue;
     out.push({ tipo: 'estimado', texto: `${etiqueta(base, k)}: importe ${g.Es_Estimado === 'SI' ? 'estimado' : 'provisorio'}, sin factura`, importe: c(g.Importe), clave: `${k}#estimado` });
   }
   const P = ctx.periodo(mes)!;
   const gasto = sum(ctx.gastos(mes).map((g) => c(g.Importe)));
-  const dif = c(P.Repartido) - gasto;
-  if (Math.abs(dif) >= 100000) out.push({ tipo: 'reparto', texto: dif > 0 ? 'Se repartió entre los lotes más de lo que se gastó' : 'Se repartió entre los lotes menos de lo que se gastó', importe: dif, clave: 'REPARTO' });
+  // lo repartido por gastos es la columna ordinaria + la extraordinaria del prorrateo (las deudas e intereses van aparte)
+  const dif = repartidoTotal(P) - gasto;
+  if (Math.abs(dif) >= 100000) out.push({ tipo: 'reparto', texto: dif > 0 ? 'Se repartió entre los lotes (gastos ordinarios + extraordinarios) más de lo que se gastó' : 'Se repartió entre los lotes (gastos ordinarios + extraordinarios) menos de lo que se gastó', importe: dif, clave: 'REPARTO' });
   for (const f of String(P.Controles_Fallidos ?? '').split('|').filter(Boolean)) {
     const m = f.match(/diferencia \$ (-?[\d.]+,\d{2})/);
     const imp = m ? c(m[1].replace(/\./g, '').replace(',', '.')) : undefined;
@@ -436,9 +461,13 @@ export function novedades(base: Base, barrio: string, mes: string, ctxIn?: Ctx):
     return x >= 0 ? -1 : 1;
   });
   if (cuota) out.push(cuota);
+  out.push(...cuotaExt);
   // aclaraciones escritas a mano (hoja NOTAS, ámbito NOVEDAD:<mes>:<clave>)
   for (const n of out) {
-    const nota = base.NOTAS.find((x) => (x.Barrio === barrio || x.Barrio === 'TODOS') && x.Ambito === `NOVEDAD:${mes}:${n.clave}`);
+    const deBarrio = (x: Fila) => x.Barrio === barrio || x.Barrio === 'TODOS';
+    // la aclaración puede estar escrita con la clave del grupo o con la de alguno de sus conceptos (notas anteriores al agrupamiento)
+    const miembros = [...new Set([...ctx.gastos(mes), ...(ant ? ctx.gastos(ant) : [])].map((g) => String(g.Concepto)).filter((k) => k !== n.clave && gr(k) === n.clave))];
+    const nota = base.NOTAS.find((x) => deBarrio(x) && x.Ambito === `NOVEDAD:${mes}:${n.clave}`) ?? base.NOTAS.find((x) => deBarrio(x) && miembros.some((k) => x.Ambito === `NOVEDAD:${mes}:${k}`));
     if (nota) {
       n.aclaracion = String(nota.Texto);
       n.idNota = String(nota.ID_Nota);

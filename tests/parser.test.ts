@@ -54,9 +54,10 @@ describe.skipIf(!HAY_PDF).each(['08', '09', '10'])('liquidación %s/2026', (m) =
 
   // Inconsistencias del propio documento (no del lector): 08/2026 el total de expensas difiere en $ 0,22;
   // 10/2026 el detalle de pendientes y el patrimonio neto difieren en $ 3.654.176,39 (H20).
+  // 09/2026: se repartió $ 1.627.054,66 más que el gasto (previsión de morosidad, H01): es real.
   const ESPERADAS: Record<string, string[]> = {
-    '08': ['Expensas a cobrar = repartido + particulares'],
-    '09': [],
+    '08': ['Expensas a cobrar = repartido (ord. + extraord.) + particulares'],
+    '09': ['Repartido (Gastos Ord. + Extraord. del prorrateo) = total de gastos'],
     '10': ['Gastos pendientes de pago: suma del detalle', 'Patrimonio neto: suma de sus partes'],
   };
   it('detecta solo las inconsistencias reales del documento', async () => {
@@ -64,6 +65,7 @@ describe.skipIf(!HAY_PDF).each(['08', '09', '10'])('liquidación %s/2026', (m) =
     const fallas = e.controles.filter((x) => !x.ok);
     expect(fallas.map((x) => x.control)).toEqual(ESPERADAS[m]);
     if (m === '08') expect(fallas[0].documento - fallas[0].calculado).toBe(22);
+    if (m === '09') expect(fallas[0].calculado - fallas[0].documento).toBe(162705466);
     if (m === '10') for (const f of fallas) expect(Math.abs(f.documento - f.calculado)).toBe(365417639);
   });
 
